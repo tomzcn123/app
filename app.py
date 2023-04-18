@@ -28,9 +28,14 @@ st.write("Stock Price Chart")
 st.plotly_chart(fig)
 
 # Display the stock data as a table
-st.write("Stock Data")
-st.write(stock_data)
+#st.write("Stock Data")
+#st.write(stock_data)
 
+if selected_option == 'SMA_EMA':
+    st.write("You have selected Option 1. Here is the information related to Option 1.")
+    
+if selected_option == 'Option 2':
+    st.write("You have selected Option 1. Here is the information related to Option 121221.")
 
 
 
