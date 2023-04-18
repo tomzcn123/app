@@ -6,6 +6,8 @@ import numpy as np
 import datetime as dt
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+from plotly.subplots import make_subplots
+
 
 # Set up the app title and description
 st.title("Stock Visualization App")
@@ -99,8 +101,8 @@ def plot_sma_ema_strategy(data):
     # Customize layout
     fig.update_layout(title='SMA-EMA Crossover Strategy', xaxis_title='Date', yaxis_title='Price')
     return fig
-# MACD strategy
 
+# MACD strategy
 def macd_strategy(data, short_period, long_period, signal_period):
     # Calculate MACD and Signal
     data['EMA_short'] = data['Close'].ewm(span=short_period).mean()
@@ -269,6 +271,95 @@ def plot_rsi_strategy(data):
     ax2.legend()
 
     plt.show()
+    
+    
+#KDJ strategy
+def kdj_strategy(data, k_period=14, d_period=3, j_period=3, buy_level=20, sell_level=80):
+    # Calculate KDJ
+    data['Lowest_Low'] = data['Low'].rolling(window=k_period).min()
+    data['Highest_High'] = data['High'].rolling(window=k_period).max()
+    data['%K'] = ((data['Close'] - data['Lowest_Low']) / (data['Highest_High'] - data['Lowest_Low'])) * 100
+    data['%D'] = data['%K'].rolling(window=d_period).mean()
+    data['%J'] = (3 * data['%D']) - (2 * data['%K'])
+
+    # Generate KDJ signals
+    data['Signal_flag'] = 0
+    data.loc[data['%K'] < buy_level, 'Signal_flag'] = 1
+    data.loc[data['%K'] > sell_level, 'Signal_flag'] = -1
+
+    # Get KDJ trades
+    win_loss = []
+    profit = []
+    position = None
+    entry_price = None
+    latest_position = None
+
+    for i in range(len(data)):
+        current_signal = data.iloc[i]['Signal_flag']
+        previous_signal = data.iloc[i - 1]['Signal_flag'] if i > 0 else None
+
+        if current_signal == 1 and previous_signal != 1:
+            if position == 'Short':  # Close short position
+                exit_price = data.iloc[i]['Close']
+                pf = (entry_price - exit_price) / entry_price
+                profit.append(pf)
+                win_loss.append(1 if pf > 0 else 0)
+                position = None
+                entry_price = None
+
+            position = 'Long'
+            entry_price = data.iloc[i]['Close']
+        elif current_signal == -1 and previous_signal != -1:
+            if position == 'Long':  # Close long position
+                exit_price = data.iloc[i]['Close']
+                pf = (exit_price - entry_price) / entry_price
+                profit.append(pf)
+                win_loss.append(1 if pf > 0 else 0)
+                position = None
+                entry_price = None
+
+            position = 'Short'
+            entry_price = data.iloc[i]['Close']
+
+        # Save the latest position
+        latest_position = position
+
+    win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+    profit_ratio = round(sum(profit) / len(profit), 3)
+
+    return data, win_loss_ratio, profit_ratio, latest_position
+
+def plot_kdj_signals(data):
+    # Create subplots
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.1)
+
+    # Plot KDJ lines
+    fig.add_trace(go.Scatter(x=data.index, y=data['%K'], mode='lines', name='%K', line=dict(color='blue')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=data.index, y=data['%D'], mode='lines', name='%D', line=dict(color='red')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=data.index, y=data['%J'], mode='lines', name='%J', line=dict(color='green')), row=1, col=1)
+
+    # Plot buy and sell signals
+    buys = data[data['Signal_flag'] == 1]
+    sells = data[data['Signal_flag'] == -1]
+    fig.add_trace(go.Scatter(x=buys.index, y=buys['Close'], mode='markers', name='Buy Signal', marker=dict(color='green', size=8, symbol='triangle-up')), row=2, col=1)
+    fig.add_trace(go.Scatter(x=sells.index, y=sells['Close'], mode='markers', name='Sell Signal', marker=dict(color='red', size=8, symbol='triangle-down')), row=2, col=1)
+
+    # Plot closing price
+    fig.add_trace(go.Scatter(x=data.index, y=data['Close'], mode='lines', name='Close', line=dict(color='black')), row=2, col=1)
+
+    # Update layout
+    fig.update_layout(
+        title='KDJ and Buy/Sell Signals',
+        xaxis_title='Date',
+        legend=dict(orientation='h', yanchor='bottom', xanchor='right', y=1.02, x=1),
+        template='plotly_white'
+    )
+
+    fig.update_yaxes(title_text="KDJ Values", row=1, col=1)
+    fig.update_yaxes(title_text="Close Price", row=2, col=1)
+
+    return fig
+
 
 
 if selected_option == 'SMA_EMA':
@@ -300,6 +391,19 @@ elif selected_option == "RSI":
     st.set_option('deprecation.showPyplotGlobalUse', False)
     fig = plot_rsi_strategy(data)
     st.pyplot(fig)
+    st.write(f"Win Loss Ratio: {win_loss_ratio}")
+    st.write(f"Profit Ratio: {profit_ratio}")
+    st.write(f"Latest Position: {latest_position}")
+
+elif selected_option == "KDJ":
+    k_period = st.sidebar.slider('K Period', min_value=1, max_value=100, value=k_period)
+    d_period = st.sidebar.slider('D Period', min_value=1, max_value=100, value=d_period)
+    j_period = st.sidebar.slider('J Period', min_value=1, max_value=100, value=j_period)
+    buy_level = st.sidebar.slider('Buy Level', min_value=0, max_value=100, value=buy_level)
+    sell_level = st.sidebar.slider('Sell Level', min_value=0, max_value=100, value=sell_level)
+    data, win_loss_ratio, profit_ratio, latest_position = kdj_strategy(stock_data, k_period, d_period, j_period, buy_level, sell_level)
+    fig = plot_kdj_signals(data)
+    st.plotly_chart(fig)
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
