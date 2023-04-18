@@ -5,6 +5,7 @@ import plotly.express as px
 import numpy as np
 import datetime as dt
 import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 
 # Set up the app title and description
 st.title("Stock Visualization App")
@@ -17,7 +18,7 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['MACD','SMA_EMA', 'Option 3']
+options= ['MACD','SMA_EMA','RSI']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
@@ -173,7 +174,89 @@ def plot_macd_strategy(data):
     fig.update_layout(title='MACD Strategy', xaxis_title='Date', yaxis_title='Price')
 
     return fig
+#RSI strategy
+def rsi_strategy_single(data, rsi_period, rsi_low, rsi_high):
+    # Calculate RSI
+    delta = data['Close'].diff()
+    gain = (delta.where(delta > 0, 0)).fillna(0)
+    loss = (delta.where(delta < 0, 0)).fillna(0).abs()
 
+    avg_gain = gain.rolling(window=rsi_period).mean()
+    avg_loss = loss.rolling(window=rsi_period).mean()
+
+    rs = avg_gain / avg_loss
+    data['RSI'] = 100 - (100 / (1 + rs))
+
+    # Generate RSI signals
+    data['Signal_flag'] = 0
+    data.loc[data['RSI'] < rsi_low, 'Signal_flag'] = 1
+    data.loc[data['RSI'] > rsi_high, 'Signal_flag'] = -1
+
+    # Get RSI trades
+    win_loss = []
+    profit = []
+    position = None
+    entry_price = None
+    latest_position = None
+
+    for i in range(len(data)):
+        current_signal = data.iloc[i]['Signal_flag']
+        previous_signal = data.iloc[i - 1]['Signal_flag'] if i > 0 else None
+
+        if current_signal == 1 and previous_signal != 1:
+            if position == 'Short':  # Close short position
+                exit_price = data.iloc[i]['Close']
+                pf = (entry_price - exit_price) / entry_price
+                profit.append(pf)
+                win_loss.append(1 if pf > 0 else 0)
+                position = None
+                entry_price = None
+
+            position = 'Long'
+            entry_price = data.iloc[i]['Close']
+        elif current_signal == -1 and previous_signal != -1:
+            if position == 'Long':  # Close long position
+                exit_price = data.iloc[i]['Close']
+                pf = (exit_price - entry_price) / entry_price
+                profit.append(pf)
+                win_loss.append(1 if pf > 0 else 0)
+                position = None
+                entry_price = None
+
+            position = 'Short'
+            entry_price = data.iloc[i]['Close']
+
+        # Save the latest position
+        latest_position = position
+
+    win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+    profit_ratio = round(sum(profit) / len(profit), 3)
+    return data, win_loss_ratio, profit_ratio, latest_position
+
+def plot_rsi_strategy(data):
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
+
+    # Plot the price chart
+    ax1.plot(data.index, data['Close'], label='Close', linewidth=1, alpha=0.8)
+    ax1.set_title('Close Price')
+    ax1.set_ylabel('Price')
+
+    # Plot buy and sell signals
+    ax1.plot(data[data['Signal_flag'] == 1].index, data['Close'][data['Signal_flag'] == 1], '^', markersize=10, color='g', label='Buy signal')
+    ax1.plot(data[data['Signal_flag'] == -1].index, data['Close'][data['Signal_flag'] == -1], 'v', markersize=10, color='r', label='Sell signal')
+
+    # Plot the RSI chart
+    ax2.plot(data.index, data['RSI'], label='RSI', linewidth=1, alpha=0.8)
+    ax2.axhline(y=30, color='r', linestyle='--', linewidth=1, alpha=0.8)
+    ax2.axhline(y=70, color='r', linestyle='--', linewidth=1, alpha=0.8)
+    ax2.set_title('RSI')
+    ax2.set_ylabel('RSI Value')
+    ax2.set_xlabel('Date')
+
+    ax1.legend()
+    ax2.legend()
+
+    plt.show()
 
 
 if selected_option == 'SMA_EMA':
@@ -196,8 +279,17 @@ elif selected_option == "MACD":
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Latest Position: ", latest_position)
+elif strategy == "RSI":
+    rsi_period = st.sidebar.slider("RSI Period", 1, 100, 14)
+    rsi_low = st.sidebar.slider("RSI Low", 1, 100, 30)
+    rsi_high = st.sidebar.slider("RSI High", 1, 100, 70)
+    data, win_loss_ratio, profit_ratio, latest_position = rsi_strategy_single(stock_data, rsi_period, rsi_low, rsi_high)
+    fig = plot_rsi_strategy(data)
+    st.pyplot(fig)
+    st.write(f"Win Loss Ratio: {win_loss_ratio}")
+    st.write(f"Profit Ratio: {profit_ratio}")
+    st.write(f"Latest Position: {latest_position}")
 
-       
     
    
 
