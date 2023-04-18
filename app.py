@@ -162,10 +162,18 @@ def plot_macd_strategy(data):
     fig.add_trace(go.Scatter(x=data.index, y=data['MACD'], name="MACD", line=dict(color="orange")))
     fig.add_trace(go.Scatter(x=data.index, y=data['Signal'], name="Signal", line=dict(color="green")))
 
+    # Add buy and sell signals
+    buys = data[data['Signal_flag'] == 1]
+    sells = data[data['Signal_flag'] == -1]
+
+    fig.add_trace(go.Scatter(x=buys.index, y=buys['Close'], mode='markers', name='Buy', marker=dict(size=8, color='lime', symbol='circle')))
+    fig.add_trace(go.Scatter(x=sells.index, y=sells['Close'], mode='markers', name='Sell', marker=dict(size=8, color='red', symbol='circle')))
+
     # Customize layout
     fig.update_layout(title='MACD Strategy', xaxis_title='Date', yaxis_title='Price')
 
     return fig
+
 
 
 if selected_option == 'SMA_EMA':
@@ -185,10 +193,9 @@ elif selected_option == "MACD":
     data, win_loss_ratio, profit_ratio, latest_position = macd_strategy(stock_data, short_period, long_period, signal_period)
     fig = plot_macd_strategy(data)
     st.plotly_chart(fig) 
-    st.write("Latest Position: ", latest_position)
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
-    st.write(data)
+    st.write("Latest Position: ", latest_position)
 
        
     
