@@ -79,15 +79,34 @@ def sma_ema_strategy(data, short_period, long_period):
     latest_position = position
     win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
     profit_ratio = round(sum(profit) / len(profit), 3)
-    
-
     return data, win_loss_ratio, profit_ratio,latest_position
 
+def plot_sma_ema_strategy(data):
+    fig = go.Figure()
+    # Plot the Close prices, SMA, and EMA lines
+    fig.add_trace(go.Scatter(x=data.index, y=data['Close'], name="Close", line=dict(color="blue")))
+    fig.add_trace(go.Scatter(x=data.index, y=data['SMA'], name="SMA", line=dict(color="orange")))
+    fig.add_trace(go.Scatter(x=data.index, y=data['EMA'], name="EMA", line=dict(color="green")))
+
+    # Add markers for buy signals (Long positions)
+    buy_signals = data[data['Signal'] == 1]
+    fig.add_trace(go.Scatter(x=buy_signals.index, y=buy_signals['Close'], mode='markers', name='Buy', marker=dict(color='lime', size=8, symbol='circle')))
+
+    # Add markers for sell signals (Short positions)
+    sell_signals = data[data['Signal'] == -1]
+    fig.add_trace(go.Scatter(x=sell_signals.index, y=sell_signals['Close'], mode='markers', name='Sell', marker=dict(color='red', size=8, symbol='circle')))
+
+    # Customize layout
+    fig.update_layout(title='SMA-EMA Crossover Strategy', xaxis_title='Date', yaxis_title='Price')
+
+    return fig
 
 if selected_option == 'SMA_EMA':
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=10, step=1)
     long_period = st.sidebar.slider("Long Period", min_value=50, max_value=200, value=50, step=1)
     data, win_loss_ratio, profit_ratio,position= sma_ema_strategy(stock_data, short_period, long_period)
+    fig = plot_sma_ema_strategy(data)
+    st.plotly_chart(fig)
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Current Recommended Position: ", position)
