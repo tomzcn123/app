@@ -17,7 +17,7 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['SMA_EMA', 'MACD', 'Option 3']
+options= ['MACD','SMA_EMA', 'Option 3']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
