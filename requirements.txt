@@ -4,3 +4,4 @@ pandas
 plotly
 numpy
 datetime
+plotly.graph_objects
