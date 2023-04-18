@@ -169,7 +169,7 @@ elif selected_option == "MACD":
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=12, step=1)
     long_period = st.sidebar.slider("Long Period", min_value=20, max_value=100, value=26, step=1)
     signal_period = st.sidebar.slider("Signal Period", min_value=5, max_value=50, value=9, step=1)
-    data, win_loss_ratio, profit_ratio, latest_position = macd_strategy(df, short_period, long_period, signal_period)
+    data, win_loss_ratio, profit_ratio, latest_position = macd_strategy(stock_data, short_period, long_period, signal_period)
     # Plot the strategy on the graph
     fig = plot_macd_strategy(data)
     st.plotly_chart(fig) 
