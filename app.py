@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 import datetime as dt
+import plotly.graph_objects as go
 
 # Set up the app title and description
 st.title("Stock Visualization App")
@@ -79,13 +80,23 @@ def sma_ema_strategy(data, short_period, long_period):
             position = 'Short'
             entry_price = data.iloc[i]['Close']
 
-    print("The win loss ratio for EMA and SMA strategy is " + str(round(sum(win_loss) / len(win_loss), 3)) + " The profit ratio for EMA and SMA strategy is " + str(round(sum(profit) / len(profit), 3)))
+    win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+    profit_ratio = round(sum(profit) / len(profit), 3)
 
-    return
-
+    return data, win_loss_ratio, profit_ratio
+   
 if selected_option == 'SMA_EMA':
-    st.write(trades = sma_ema_strategy(df, 10, 50))
-
+    short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=10, step=1)
+    long_period = st.sidebar.slider("Long Period", min_value=50, max_value=200, value=50, step=1)
+    data, win_loss_ratio, profit_ratio = sma_ema_strategy(df, short_period, long_period)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=data.index, y=data['Close'], name="Close"))
+    fig.add_trace(go.Scatter(x=data.index, y=data['SMA'], name="SMA", line=dict(color="orange")))
+    fig.add_trace(go.Scatter(x=data.index, y=data['EMA'], name="EMA", line=dict(color="green")))
+    st.plotly_chart(fig)
+    st.write("Win Loss Ratio: ", win_loss_ratio)
+    st.write("Profit Ratio: ", profit_ratio)
+    
 
 
 
