@@ -29,62 +29,66 @@ st.write("Stock Price Chart")
 st.plotly_chart(fig)
 
 # Display the stock data as a table
-st.write("Stock Data")
-st.write(stock_data)
+#st.write("Stock Data")
+#st.write(stock_data)
     
-if selected_option == 'Option 2':
-    st.write("You have selected Option 1. Here is the information related to Option 121221.")
 
 
 
 
-
-
-
-def calculate_sma_ema(data, short_period, long_period):
+def sma_ema_strategy(data, short_period, long_period):
+    # Calculate SMA and EMA
     data['SMA'] = data['Close'].rolling(window=short_period).mean()
     data['EMA'] = data['Close'].ewm(span=long_period).mean()
-    return data
 
-def generate_signals(data):
+    # Generate signals
     data['Signal'] = 0
     data.loc[data['EMA'] > data['SMA'], 'Signal'] = 1
     data.loc[data['EMA'] < data['SMA'], 'Signal'] = -1
-    return data
 
-def get_trades(data):
+    # Get trades
     win_loss = []
-    profit =[]
+    profit = []
     position = None
     entry_price = None
-    
+
     for i in range(len(data)):
         current_signal = data.iloc[i]['Signal']
         previous_signal = data.iloc[i - 1]['Signal'] if i > 0 else None
-        
+
         if current_signal == 1 and previous_signal != 1:
+            if position == 'Short':  # Close short position
+                exit_price = data.iloc[i]['Close']
+                pf = (entry_price - exit_price) / entry_price
+                profit.append(pf)
+                win_loss.append(1 if pf > 0 else 0)
+                position = None
+                entry_price = None
+
             position = 'Long'
             entry_price = data.iloc[i]['Close']
-        elif current_signal == -1 and previous_signal != -1 and position == 'Long':
-            exit_price = data.iloc[i]['Close']
-            pf = (exit_price -entry_price)/entry_price
-            profit.append(pf)
-            if pf > 0:
-                win_loss.append(1)
-            elif pf <= 0:
-                win_loss.append(0)
-            position = None
-            entry_price = None
-    print("The win loss ratio for EMA and SMA strategy is " + str(round(sum(win_loss)/len(win_loss),3)) + " The profit ratio for EMA and SMA strategy is " + str(round(sum(profit)/len(profit),3)))
-    return 
+        elif current_signal == -1 and previous_signal != -1:
+            if position == 'Long':  # Close long position
+                exit_price = data.iloc[i]['Close']
+                pf = (exit_price - entry_price) / entry_price
+                profit.append(pf)
+                win_loss.append(1 if pf > 0 else 0)
+                position = None
+                entry_price = None
 
-def sma_ema_strategy(data, short_period, long_period):
-    data = calculate_sma_ema(data, short_period, long_period)
-    data = generate_signals(data)
-    trades = get_trades(data)
+            position = 'Short'
+            entry_price = data.iloc[i]['Close']
+
+    print("The win loss ratio for EMA and SMA strategy is " + str(round(sum(win_loss) / len(win_loss), 3)) + " The profit ratio for EMA and SMA strategy is " + str(round(sum(profit) / len(profit), 3)))
+
     return
+
 if selected_option == 'SMA_EMA':
-    st.write(sma_ema_strategy(stock_data, 10, 50))
+    st.write(trades = sma_ema_strategy(df, 10, 50))
+
+
+
+
 
 
 
