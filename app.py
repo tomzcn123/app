@@ -279,7 +279,8 @@ elif selected_option == "MACD":
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Latest Position: ", latest_position)
-elif strategy == "RSI":
+    
+elif selected_option == "RSI":
     rsi_period = st.sidebar.slider("RSI Period", 1, 100, 14)
     rsi_low = st.sidebar.slider("RSI Low", 1, 100, 30)
     rsi_high = st.sidebar.slider("RSI High", 1, 100, 70)
