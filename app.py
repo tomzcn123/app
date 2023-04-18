@@ -78,17 +78,18 @@ def sma_ema_strategy(data, short_period, long_period):
 
     win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
     profit_ratio = round(sum(profit) / len(profit), 3)
+    
 
-    return data, win_loss_ratio, profit_ratio
+    return data, win_loss_ratio, profit_ratio,position
 
 
 if selected_option == 'SMA_EMA':
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=10, step=1)
     long_period = st.sidebar.slider("Long Period", min_value=50, max_value=200, value=50, step=1)
-    data, win_loss_ratio, profit_ratio = sma_ema_strategy(stock_data, short_period, long_period)
+    data, win_loss_ratio, profit_ratio,position= sma_ema_strategy(stock_data, short_period, long_period)
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
-
+    st.write("Current Recommended Position: ", position)
 
 
 
