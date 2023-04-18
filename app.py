@@ -88,14 +88,14 @@ def sma_ema_strategy(data, short_period, long_period):
 if selected_option == 'SMA_EMA':
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=10, step=1)
     long_period = st.sidebar.slider("Long Period", min_value=50, max_value=200, value=50, step=1)
-    data, win_loss_ratio, profit_ratio = sma_ema_strategy(stock_data, short_period, long_period)
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=data.index, y=data['Close'], name="Close"))
-    fig.add_trace(go.Scatter(x=data.index, y=data['SMA'], name="SMA", line=dict(color="orange")))
-    fig.add_trace(go.Scatter(x=data.index, y=data['EMA'], name="EMA", line=dict(color="green")))
-    st.plotly_chart(fig)
-    st.write("Win Loss Ratio: ", win_loss_ratio)
-    st.write("Profit Ratio: ", profit_ratio)
+    #data, win_loss_ratio, profit_ratio = sma_ema_strategy(stock_data, short_period, long_period)
+    #fig = go.Figure()
+    #fig.add_trace(go.Scatter(x=data.index, y=data['Close'], name="Close"))
+    #fig.add_trace(go.Scatter(x=data.index, y=data['SMA'], name="SMA", line=dict(color="orange")))
+    #fig.add_trace(go.Scatter(x=data.index, y=data['EMA'], name="EMA", line=dict(color="green")))
+    #st.plotly_chart(fig)
+    #st.write("Win Loss Ratio: ", win_loss_ratio)
+    #st.write("Profit Ratio: ", profit_ratio)
     
 
 
