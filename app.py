@@ -154,26 +154,38 @@ def macd_strategy(data, short_period, long_period, signal_period):
     return data, win_loss_ratio, profit_ratio, latest_position
 
 def plot_macd_strategy(data):
-    fig = go.Figure()
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(14, 10), gridspec_kw={'height_ratios': [3, 1, 1]}, sharex=True)
 
-    # Plot Close prices
-    fig.add_trace(go.Scatter(x=data.index, y=data['Close'], name="Close", line=dict(color="blue")))
+    # Plot the price chart
+    ax1.plot(data.index, data['Close'], label='Close', linewidth=1, alpha=0.8)
+    ax1.set_title('Close Price')
+    ax1.set_ylabel('Price')
 
-    # Plot MACD and Signal lines
-    fig.add_trace(go.Scatter(x=data.index, y=data['MACD'], name="MACD", line=dict(color="orange")))
-    fig.add_trace(go.Scatter(x=data.index, y=data['Signal'], name="Signal", line=dict(color="green")))
+    # Plot buy and sell signals
+    ax1.plot(data[data['Signal_flag'] == 1].index, data['Close'][data['Signal_flag'] == 1], '^', markersize=10, color='g', label='Buy signal')
+    ax1.plot(data[data['Signal_flag'] == -1].index, data['Close'][data['Signal_flag'] == -1], 'v', markersize=10, color='r', label='Sell signal')
 
-    # Add buy and sell signals
-    buys = data[data['Signal_flag'] == 1]
-    sells = data[data['Signal_flag'] == -1]
+    # Plot the MACD chart
+    ax2.plot(data.index, data['MACD'], label='MACD', linewidth=1, alpha=0.8)
+    ax2.plot(data.index, data['Signal'], label='Signal', linewidth=1, alpha=0.8)
+    ax2.set_title('MACD & Signal')
+    ax2.set_ylabel('Value')
 
-    fig.add_trace(go.Scatter(x=buys.index, y=buys['Close'], mode='markers', name='Buy', marker=dict(size=8, color='lime', symbol='circle')))
-    fig.add_trace(go.Scatter(x=sells.index, y=sells['Close'], mode='markers', name='Sell', marker=dict(size=8, color='red', symbol='circle')))
+    # Plot the MACD line chart with buy and sell signals
+    ax3.plot(data.index, data['MACD'] - data['Signal'], label='MACD Line', linewidth=1, alpha=0.8)
+    ax3.axhline(y=0, color='r', linestyle='--', linewidth=1, alpha=0.8)
+    ax3.plot(data[data['Signal_flag'] == 1].index, (data['MACD'] - data['Signal'])[data['Signal_flag'] == 1], '^', markersize=10, color='g', label='Buy signal')
+    ax3.plot(data[data['Signal_flag'] == -1].index, (data['MACD'] - data['Signal'])[data['Signal_flag'] == -1], 'v', markersize=10, color='r', label='Sell signal')
+    ax3.set_title('MACD Line')
+    ax3.set_ylabel('Value')
+    ax3.set_xlabel('Date')
 
-    # Customize layout
-    fig.update_layout(title='MACD Strategy', xaxis_title='Date', yaxis_title='Price')
+    ax1.legend()
+    ax2.legend()
+    ax3.legend()
 
-    return fig
+    plt.show()
+
 #RSI strategy
 def rsi_strategy_single(data, rsi_period, rsi_low, rsi_high):
     # Calculate RSI
