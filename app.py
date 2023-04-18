@@ -35,7 +35,9 @@ st.plotly_chart(fig)
     
 
 
-
+if selected_option == 'SMA_EMA':
+    short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=10, step=1)
+    long_period = st.sidebar.slider("Long Period", min_value=50, max_value=200, value=50, step=1)
 
 
 
