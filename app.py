@@ -184,7 +184,7 @@ def plot_macd_strategy(data):
     ax2.legend()
     ax3.legend()
 
-    plt.show()
+    return fig
 
 #RSI strategy
 def rsi_strategy_single(data, rsi_period, rsi_low, rsi_high):
@@ -287,7 +287,7 @@ elif selected_option == "MACD":
     signal_period = st.sidebar.slider("Signal Period", min_value=5, max_value=50, value=9, step=1)
     data, win_loss_ratio, profit_ratio, latest_position = macd_strategy(stock_data, short_period, long_period, signal_period)
     fig = plot_macd_strategy(data)
-    st.plotly_chart(fig) 
+    st.pyplot(fig)
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Latest Position: ", latest_position)
