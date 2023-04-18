@@ -6,14 +6,14 @@ import numpy as np
 
 # Set up the app title and description
 st.title("Stock Visualization App")
-st.write("""
-Simple app to visualize stock price data. Enter a stock symbol and select a date range.
-""")
+
+# Create a sidebar title
+st.sidebar.title("Enter a stock symbol and select a date range")
 
 # Get the user input for stock symbol and date range
-stock_symbol = st.text_input("Enter Stock Symbol", "AAPL")
-start_date = st.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
-end_date = st.date_input("End Date", value=pd.to_datetime("today"))
+stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
+start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
+end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
 # Download stock data using yfinance
 stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
@@ -27,27 +27,10 @@ fig = px.line(stock_data, x=stock_data.index, y='Close', title=f'{stock_symbol} 
 st.write("Stock Price Chart")
 st.plotly_chart(fig)
 
-# Create a sidebar title
-st.sidebar.title("My Sidebar")
 
-# Add a text input widget to the sidebar
-user_input = st.sidebar.text_input("Enter some text")
 
-# Add a selectbox widget to the sidebar
-options = ['Option 1', 'Option 2', 'Option 3']
-selected_option = st.sidebar.selectbox("Choose an option", options)
 
-# Add a slider widget to the sidebar
-slider_value = st.sidebar.slider("Select a value", min_value=0, max_value=100, value=50)
 
-# Add a checkbox widget to the sidebar
-checkbox_value = st.sidebar.checkbox("Check me")
-
-# Display the values of the widgets in the main content area
-st.write("You entered:", user_input)
-st.write("You selected:", selected_option)
-st.write("Slider value:", slider_value)
-st.write("Checkbox value:", checkbox_value)
 
 
 
