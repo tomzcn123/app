@@ -48,6 +48,7 @@ def sma_ema_strategy(data, short_period, long_period):
     profit = []
     position = None
     entry_price = None
+    latest_position = None
 
     for i in range(len(data)):
         current_signal = data.iloc[i]['Signal']
@@ -75,12 +76,12 @@ def sma_ema_strategy(data, short_period, long_period):
 
             position = 'Short'
             entry_price = data.iloc[i]['Close']
-
+    latest_position = position
     win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
     profit_ratio = round(sum(profit) / len(profit), 3)
     
 
-    return data, win_loss_ratio, profit_ratio,position
+    return data, win_loss_ratio, profit_ratio,latest_position
 
 
 if selected_option == 'SMA_EMA':
