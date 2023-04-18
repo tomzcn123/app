@@ -33,7 +33,7 @@ st.write("Stock Data")
 st.write(stock_data)
 
 if selected_option == 'SMA_EMA':
-    st.write("You have selected Option 1. Here is the information related to Option 1.")
+    st.write("You have selected Option 1. Here is the information related to Option 1.",sma_ema_strategy(stock_data, 10, 50))
     
 if selected_option == 'Option 2':
     st.write("You have selected Option 1. Here is the information related to Option 121221.")
@@ -86,6 +86,8 @@ def sma_ema_strategy(data, short_period, long_period):
     data = generate_signals(data)
     trades = get_trades(data)
     return
+
+
 
 
 
