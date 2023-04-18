@@ -396,11 +396,11 @@ elif selected_option == "RSI":
     st.write(f"Latest Position: {latest_position}")
 
 elif selected_option == "KDJ":
-    k_period = st.sidebar.slider('K Period', min_value=1, max_value=100, value=k_period)
-    d_period = st.sidebar.slider('D Period', min_value=1, max_value=100, value=d_period)
-    j_period = st.sidebar.slider('J Period', min_value=1, max_value=100, value=j_period)
-    buy_level = st.sidebar.slider('Buy Level', min_value=0, max_value=100, value=buy_level)
-    sell_level = st.sidebar.slider('Sell Level', min_value=0, max_value=100, value=sell_level)
+    k_period = st.sidebar.slider('K Period', min_value=1, max_value=100, value=14)
+    d_period = st.sidebar.slider('D Period', min_value=1, max_value=100, value=3)
+    j_period = st.sidebar.slider('J Period', min_value=1, max_value=100, value=3)
+    buy_level = st.sidebar.slider('Buy Level', min_value=0, max_value=100, value=20)
+    sell_level = st.sidebar.slider('Sell Level', min_value=0, max_value=100, value=80)
     data, win_loss_ratio, profit_ratio, latest_position = kdj_strategy(stock_data, k_period, d_period, j_period, buy_level, sell_level)
     fig = plot_kdj_signals(data)
     st.plotly_chart(fig)
