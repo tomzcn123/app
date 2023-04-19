@@ -556,32 +556,27 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
 
 
 def plot_parabolic_sar_strategy_and_sar(data):
-    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(12, 8), sharex=True)
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.plot(data.index, data['Close'], label='Close', alpha=0.7)
 
-    # Plot the Close prices and Parabolic SAR
-    ax1.plot(data.index, data['Close'], label='Close', alpha=0.8)
-    ax1.plot(data.index, data['SAR'], label='Parabolic SAR', linestyle='--', alpha=0.8)
-    ax1.set_title('Parabolic SAR Strategy and Signals')
-    ax1.set_ylabel('Price')
-    ax1.legend()
+    # Plot the buy signals
+    buy_signals = data[(data['Close'] > data['SAR'].shift(1)) & (data['Close'].shift(1) <= data['SAR'].shift(2))]
+    ax.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', label='Buy', alpha=1)
 
-    # Plot buy and sell signals
-    buy_signals = data[data['Close'] >= data['SAR']]
-    sell_signals = data[data['Close'] < data['SAR']]
+    # Plot the sell signals
+    sell_signals = data[(data['Close'] < data['SAR'].shift(1)) & (data['Close'].shift(1) >= data['SAR'].shift(2))]
+    ax.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', label='Sell', alpha=1)
 
-    ax1.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', s=100, label='Buy Signal')
-    ax1.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', s=100, label='Sell Signal')
+    # Plot the Parabolic SAR
+    ax.plot(data.index, data['SAR'], label='Parabolic SAR', color='blue', linestyle='--', alpha=0.7)
 
-    # Plot the Parabolic SAR separately
-    ax2.plot(data.index, data['SAR'], label='Parabolic SAR', linestyle='--', alpha=0.8)
-    ax2.set_title('Parabolic SAR')
-    ax2.set_ylabel('Value')
-    ax2.legend()
-
-    plt.xlabel('Date')
-    plt.tight_layout()
+    ax.set_title('Parabolic SAR Strategy and Parabolic SAR')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Close Price')
+    ax.legend(loc='best')
 
     return fig
+
 
 
 
