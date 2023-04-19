@@ -493,16 +493,17 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
     ep = start_low if trend == 'Long' else start_high
     af = start
     sar = start_high if trend == 'Long' else start_low
-    
+
     position = None
     entry_price = None
     win_loss = []
     profit = []
-    
+
     for i in range(2, len(data)):
         prev_sar = sar
         data.at[i, 'SAR'] = sar
-        
+
+        # Update SAR value and trend
         if trend == 'Long':
             if data.iloc[i]['Low'] <= prev_sar:
                 trend = 'Short'
@@ -527,16 +528,11 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
                     af = min(af + increment, maximum)
 
         # Strategy evaluation
-        current_sar = data.iloc[i]['SAR']
-        prev_sar = data.iloc[i - 1]['SAR']
-        current_close = data.iloc[i]['Close']
-        prev_close = data.iloc[i - 1]['Close']
-        
-        if prev_close < prev_sar and current_close >= current_sar and position is None:
+        if trend == 'Long' and position is None:
             position = 'Long'
-            entry_price = current_close
-        elif prev_close > prev_sar and current_close <= current_sar and position == 'Long':
-            exit_price = current_close
+            entry_price = data.iloc[i]['Close']
+        elif trend == 'Short' and position == 'Long':
+            exit_price = data.iloc[i]['Close']
             pf = (exit_price - entry_price) / entry_price
             profit.append(pf)
             if pf > 0:
@@ -545,12 +541,13 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
                 win_loss.append(0)
             position = None
             entry_price = None
-    
-    win_loss_ratio = round(np.sum(win_loss) / len(win_loss), 3)
-    profit_ratio = round(np.sum(profit) / len(profit), 3)
+
+    win_loss_ratio = round(np.sum(win_loss) / len(win_loss), 3) if len(win_loss) > 0 else float('NaN')
+    profit_ratio = round(np.sum(profit) / len(profit), 3) if len(profit) > 0 else float('NaN')
     latest_position = position
-    
+
     return data, win_loss_ratio, profit_ratio, latest_position
+
 
           
 
