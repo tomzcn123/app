@@ -553,26 +553,34 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
 
 
 def plot_parabolic_sar_strategy_and_sar(data):
-    fig, ax = plt.subplots(figsize=(12, 8))
-    ax.plot(data.index, data['Close'], label='Close', alpha=0.7)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12), sharex=True)
+
+    # Plot the Close price
+    ax1.plot(data.index, data['Close'], label='Close', alpha=0.7)
 
     # Plot the buy signals
     buy_signals = data[(data['Close'] > data['SAR'].shift(1)) & (data['Close'].shift(1) <= data['SAR'].shift(2))]
-    ax.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', label='Buy', alpha=1)
+    ax1.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', label='Buy', alpha=1)
 
     # Plot the sell signals
     sell_signals = data[(data['Close'] < data['SAR'].shift(1)) & (data['Close'].shift(1) >= data['SAR'].shift(2))]
-    ax.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', label='Sell', alpha=1)
+    ax1.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', label='Sell', alpha=1)
+
+    ax1.set_title('Parabolic SAR Strategy')
+    ax1.set_ylabel('Close Price')
+    ax1.legend(loc='best')
 
     # Plot the Parabolic SAR
-    ax.plot(data.index, data['SAR'], label='Parabolic SAR', color='blue', linestyle='--', alpha=0.7)
+    ax2.plot(data.index, data['SAR'], label='Parabolic SAR', color='blue', linestyle='--', alpha=0.7)
+    ax2.set_title('Parabolic SAR')
+    ax2.set_xlabel('Date')
+    ax2.set_ylabel('SAR Value')
+    ax2.legend(loc='best')
 
-    ax.set_title('Parabolic SAR Strategy and Parabolic SAR')
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Close Price')
-    ax.legend(loc='best')
+    fig.tight_layout()
 
     return fig
+
 
 
 
