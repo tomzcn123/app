@@ -20,7 +20,7 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['MACD','SMA_EMA','RSI','KDJ','WR']
+options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
@@ -421,6 +421,70 @@ def plot_wr_and_strategy(data):
     
     return fig
 
+#Bollinger Band
+def bollinger_bands_strategy_and_bands(data, period=20):
+    # Calculate Bollinger Bands
+    data['SMA'] = data['Close'].rolling(window=period).mean()
+    data['STD'] = data['Close'].rolling(window=period).std()
+    data['Upper_Band'] = data['SMA'] + 2 * data['STD']
+    data['Lower_Band'] = data['SMA'] - 2 * data['STD']
+    
+    # Bollinger Bands Strategy
+    position = None
+    entry_price = None
+    win_loss = []
+    profit = []
+    
+    for i in range(len(data)):
+        current_close = data.iloc[i]['Close']
+        upper_band = data.iloc[i]['Upper_Band']
+        lower_band = data.iloc[i]['Lower_Band']
+        
+        if current_close < lower_band and position is None:
+            position = 'Long'
+            entry_price = current_close
+        elif current_close > upper_band and position == 'Long':
+            exit_price = current_close
+            pf = (exit_price - entry_price) / entry_price
+            profit.append(pf)
+            if pf > 0:
+                win_loss.append(1)
+            elif pf <= 0:
+                win_loss.append(0)
+            position = None
+            entry_price = None
+    
+    win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+    profit_ratio = round(sum(profit) / len(profit), 3)
+    latest_position = position
+    
+    return data, win_loss_ratio, profit_ratio, latest_position
+
+def plot_bollinger_bands_strategy_and_bands(data):
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12), sharex=True)
+    
+    # Plot Buy and Sell Signals
+    ax1.plot(data['Close'], label='Close Price', alpha=0.4)
+    buy_signals = data[data['Close'] < data['Lower_Band']]
+    ax1.scatter(buy_signals.index, buy_signals['Close'], label='Buy Signal', marker='^', color='green')
+    sell_signals = data[data['Close'] > data['Upper_Band']]
+    ax1.scatter(sell_signals.index, sell_signals['Close'], label='Sell Signal', marker='v', color='red')
+    ax1.set_title('Bollinger Bands Strategy Buy and Sell Signals')
+    ax1.set_ylabel('Close Price')
+    ax1.legend(loc='upper left')
+    
+    # Plot Bollinger Bands
+    ax2.plot(data['Close'], label='Close Price', alpha=0.4)
+    ax2.plot(data['Upper_Band'], label='Upper Band', linestyle='--', color='red')
+    ax2.plot(data['Lower_Band'], label='Lower Band', linestyle='--', color='red')
+    ax2.plot(data['SMA'], label='SMA', linestyle='-', color='blue')
+    ax2.set_title('Bollinger Bands')
+    ax2.set_xlabel('Date')
+    ax2.set_ylabel('Close Price')
+    ax2.legend(loc='upper left')
+    
+    return fig
+
 
 
 
@@ -474,23 +538,39 @@ elif selected_option == "KDJ":
     
 elif selected_option == "WR":
     st.title('Williams %R Strategy')
-
     # Create sliders
     period = st.sidebar.slider('Period', min_value=1, max_value=50, value=14, step=1)
     low_wr = st.sidebar.slider('Low WR', min_value=-100, max_value=0, value=-80, step=1)
     high_wr = st.sidebar.slider('High WR', min_value=-100, max_value=0, value=-20, step=1)
-
     # Calculate the strategy and ratios
     data, win_loss_ratio, profit_ratio, latest_position = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr)
-    
     # Plot the strategy
     fig = plot_wr_and_strategy(data)
+    st.pyplot(fig)
+    # Display the results
+    st.write(f"Win Loss Ratio: {win_loss_ratio}")
+    st.write(f"Profit Ratio: {profit_ratio}")
+    st.write(f"Latest Position: {latest_position}")
+    
+elif selected_option == "BB":
+    st.title('Bollinger Bands Strategy')
+
+    # Create a slider for the period in the sidebar
+    period = st.sidebar.slider('Period', min_value=1, max_value=50, value=20, step=1)
+
+    # Calculate the strategy and bands with the selected period
+    data, win_loss_ratio, profit_ratio, latest_position = bollinger_bands_strategy_and_bands(stock_data, period)
+    
+    # Plot the strategy and Bollinger Bands
+    fig = plot_bollinger_bands_strategy_and_bands(data)
     st.pyplot(fig)
     
     # Display the results
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
+
+    
     
     
     
