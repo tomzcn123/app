@@ -388,6 +388,7 @@ elif selected_option == "RSI":
     rsi_low = st.sidebar.slider("RSI Low", 1, 100, 30)
     rsi_high = st.sidebar.slider("RSI High", 1, 100, 70)
     data, win_loss_ratio, profit_ratio, latest_position = rsi_strategy_single(stock_data, rsi_period, rsi_low, rsi_high)
+    st.write("RSI Strategy")
     st.set_option('deprecation.showPyplotGlobalUse', False)
     fig = plot_rsi_strategy(data)
     st.pyplot(fig)
