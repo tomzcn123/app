@@ -397,21 +397,20 @@ def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20):
     profit_ratio = round(sum(profit) / len(profit), 3)
     return data, win_loss_ratio, profit_ratio, latest_position
 
-def plot_strategy(data):
-    plt.figure(figsize=(12, 6))
-    plt.plot(data['Close'], label='Close Price', alpha=0.4)
+def plot_strategy(data, ax):
+    ax.plot(data['Close'], label='Close Price', alpha=0.4)
     
     buy_signals = data[data['Buy']]
-    plt.scatter(buy_signals.index, buy_signals['Close'], label='Buy Signal', marker='^', color='green')
+    ax.scatter(buy_signals.index, buy_signals['Close'], label='Buy Signal', marker='^', color='green')
     
     sell_signals = data[data['Sell']]
-    plt.scatter(sell_signals.index, sell_signals['Close'], label='Sell Signal', marker='v', color='red')
+    ax.scatter(sell_signals.index, sell_signals['Close'], label='Sell Signal', marker='v', color='red')
     
-    plt.title('Williams %R Strategy Buy and Sell Signals')
-    plt.xlabel('Date')
-    plt.ylabel('Close Price')
-    plt.legend(loc='upper left')
-    plt.show()
+    ax.set_title('Williams %R Strategy Buy and Sell Signals')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Close Price')
+    ax.legend(loc='upper left')
+
 
 
 
