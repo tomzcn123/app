@@ -20,7 +20,7 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB']
+options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Parabolic Sar']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
@@ -482,9 +482,103 @@ def plot_bollinger_bands_strategy_and_bands(data):
     ax2.set_xlabel('Date')
     ax2.set_ylabel('Close Price')
     ax2.legend(loc='upper left')
-    
     return fig
 
+# parabolic_sar_strategy
+def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2):
+    data['SAR'] = 0.0
+    trend = 'Long'
+    start_high = data['High'][0]
+    start_low = data['Low'][0]
+    ep = start_low if trend == 'Long' else start_high
+    af = start
+    sar = start_high if trend == 'Long' else start_low
+    
+    position = None
+    entry_price = None
+    win_loss = []
+    profit = []
+    
+    for i in range(1, len(data)):
+        prev_sar = sar
+        data.at[i, 'SAR'] = sar
+        
+        if trend == 'Long':
+            if data['Low'][i] <= prev_sar:
+                trend = 'Short'
+                sar = max(data['High'][i - 1], data['High'][i])
+                af = start
+                ep = data['High'][i]
+            else:
+                sar = prev_sar + af * (ep - prev_sar)
+                if data['Low'][i - 1] < ep:
+                    ep = data['Low'][i - 1]
+                    af = min(af + increment, maximum)
+        else:
+            if data['High'][i] >= prev_sar:
+                trend = 'Long'
+                sar = min(data['Low'][i - 1], data['Low'][i])
+                af = start
+                ep = data['Low'][i]
+            else:
+                sar = prev_sar - af * (prev_sar - ep)
+                if data['High'][i - 1] > ep:
+                    ep = data['High'][i - 1]
+                    af = min(af + increment, maximum)
+
+        # Strategy evaluation
+        current_sar = data.iloc[i]['SAR']
+        prev_sar = data.iloc[i - 1]['SAR']
+        current_close = data.iloc[i]['Close']
+        prev_close = data.iloc[i - 1]['Close']
+        
+        if prev_close < prev_sar and current_close >= current_sar and position is None:
+            position = 'Long'
+            entry_price = current_close
+        elif prev_close > prev_sar and current_close <= current_sar and position == 'Long':
+            exit_price = current_close
+            pf = (exit_price - entry_price) / entry_price
+            profit.append(pf)
+            if pf > 0:
+                win_loss.append(1)
+            elif pf <= 0:
+                win_loss.append(0)
+            position = None
+            entry_price = None
+    
+    win_loss_ratio = round(np.sum(win_loss) / len(win_loss), 3)
+    profit_ratio = round(np.sum(profit) / len(profit), 3)
+    latest_position = position
+    
+    return data, win_loss_ratio, profit_ratio, latest_position
+
+def plot_parabolic_sar_strategy_and_sar(data):
+    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(12, 8), sharex=True)
+
+    # Plot the Close prices and Parabolic SAR
+    ax1.plot(data.index, data['Close'], label='Close', alpha=0.8)
+    ax1.plot(data.index, data['SAR'], label='Parabolic SAR', linestyle='--', alpha=0.8)
+    ax1.set_title('Parabolic SAR Strategy and Signals')
+    ax1.set_ylabel('Price')
+    ax1.legend()
+
+    # Plot buy and sell signals
+    buy_signals = data[data['Close'] >= data['SAR']]
+    sell_signals = data[data['Close'] < data['SAR']]
+
+    ax1.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', s=100, label='Buy Signal')
+    ax1.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', s=100, label='Sell Signal')
+
+    # Plot the Parabolic SAR separately
+    ax2.plot(data.index, data['SAR'], label='Parabolic SAR', linestyle='--', alpha=0.8)
+    ax2.set_title('Parabolic SAR')
+    ax2.set_ylabel('Value')
+    ax2.legend()
+
+    plt.xlabel('Date')
+    plt.tight_layout()
+
+    return fig
 
 
 
@@ -569,6 +663,27 @@ elif selected_option == "BB":
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
+    
+elif selected_option == "Parabolic Sar":
+    st.title('Parabolic SAR Strategy')
+
+    # Create sliders for the start, increment, and maximum in the sidebar
+    start = st.sidebar.slider('Start', min_value=0.01, max_value=0.10, value=0.02, step=0.01)
+    increment = st.sidebar.slider('Increment', min_value=0.01, max_value=0.10, value=0.02, step=0.01)
+    maximum = st.sidebar.slider('Maximum', min_value=0.1, max_value=0.5, value=0.2, step=0.1)
+
+    # Calculate the strategy and Parabolic SAR with the selected parameters
+    data, win_loss_ratio, profit_ratio, latest_position = parabolic_sar_strategy_and_sar(stock_data, start, increment, maximum)
+    # Plot the strategy and Parabolic SAR
+    fig = plot_parabolic_sar_strategy_and_sar(data)
+    st.pyplot(fig)
+    
+    # Display the results
+    st.write(f"Win Loss Ratio: {win_loss_ratio}")
+    st.write(f"Profit Ratio: {profit_ratio}")
+    st.write(f"Latest Position: {latest_position}")
+
+    
 
     
     
