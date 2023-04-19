@@ -471,17 +471,19 @@ elif selected_option == "WR":
     high_wr = st.sidebar.slider('High WR', min_value=-100, max_value=0, value=-20, step=1)
 
     # Calculate the strategy and ratios
-    df, win_loss_ratio, profit_ratio, latest_position = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr)
-
+    data, win_loss_ratio, profit_ratio, latest_position = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr)
+    
+    # Plot the strategy
+    fig, ax = plt.subplots(figsize=(12, 6))
+    plot_strategy(data, ax)
+    st.pyplot(fig)
+    
     # Display the results
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
     
-    # Plot the strategy
-    fig, ax = plt.subplots(figsize=(12, 6))
-    plot_strategy(df, ax)
-    st.pyplot(fig)
+    
     
    
 
