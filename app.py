@@ -504,26 +504,26 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
         data.at[i, 'SAR'] = sar
         
         if trend == 'Long':
-            if data['Low'][i] <= prev_sar:
+            if data.iloc[i]['Low'] <= prev_sar:
                 trend = 'Short'
-                sar = max(data['High'][i - 1], data['High'][i])
+                sar = max(data.iloc[i - 1]['High'], data.iloc[i]['High'])
                 af = start
-                ep = data['High'][i]
+                ep = data.iloc[i]['High']
             else:
                 sar = prev_sar + af * (ep - prev_sar)
-                if data['Low'][i - 1] < ep:
-                    ep = data['Low'][i - 1]
+                if data.iloc[i - 1]['Low'] < ep:
+                    ep = data.iloc[i - 1]['Low']
                     af = min(af + increment, maximum)
         else:
-            if data['High'][i] >= prev_sar:
+            if data.iloc[i]['High'] >= prev_sar:
                 trend = 'Long'
-                sar = min(data['Low'][i - 1], data['Low'][i])
+                sar = min(data.iloc[i - 1]['Low'], data.iloc[i]['Low'])
                 af = start
-                ep = data['Low'][i]
+                ep = data.iloc[i]['Low']
             else:
                 sar = prev_sar - af * (prev_sar - ep)
-                if data['High'][i - 1] > ep:
-                    ep = data['High'][i - 1]
+                if data.iloc[i - 1]['High'] > ep:
+                    ep = data.iloc[i - 1]['High']
                     af = min(af + increment, maximum)
 
         # Strategy evaluation
@@ -551,6 +551,8 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
     latest_position = position
     
     return data, win_loss_ratio, profit_ratio, latest_position
+
+          
 
 
 def plot_parabolic_sar_strategy_and_sar(data):
