@@ -20,7 +20,7 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['MACD','SMA_EMA','RSI','KDJ']
+options= ['MACD','SMA_EMA','RSI','KDJ','WR']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
@@ -357,8 +357,61 @@ def plot_kdj_signals(data):
 
     fig.update_yaxes(title_text="KDJ Values", row=1, col=1)
     fig.update_yaxes(title_text="Close Price", row=2, col=1)
-
     return fig
+
+
+
+#WR strategy
+def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20):
+    data['High_max'] = data['High'].rolling(window=period).max()
+    data['Low_min'] = data['Low'].rolling(window=period).min()
+    data['WR'] = -100 * ((data['High_max'] - data['Close']) / (data['High_max'] - data['Low_min']))
+    
+    data['Buy'] = ((data['WR'] > low_wr) & (data['WR'].shift(1) <= low_wr))
+    data['Sell'] = ((data['WR'] < high_wr) & (data['WR'].shift(1) >= high_wr))
+
+    win_loss = []
+    profit = []
+    position = None
+    entry_price = None
+    latest_position = None
+
+    for i in range(len(data)):
+        if data.iloc[i]['Buy'] and position is None:
+            position = 'Long'
+            entry_price = data.iloc[i]['Close']
+        elif data.iloc[i]['Sell'] and position == 'Long':
+            exit_price = data.iloc[i]['Close']
+            pf = (exit_price - entry_price) / entry_price
+            profit.append(pf)
+            if pf > 0:
+                win_loss.append(1)
+            elif pf <= 0:
+                win_loss.append(0)
+            position = None
+            entry_price = None
+        
+        latest_position = position
+
+    win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+    profit_ratio = round(sum(profit) / len(profit), 3)
+    return data, win_loss_ratio, profit_ratio, latest_position
+
+def plot_strategy(data):
+    plt.figure(figsize=(12, 6))
+    plt.plot(data['Close'], label='Close Price', alpha=0.4)
+    
+    buy_signals = data[data['Buy']]
+    plt.scatter(buy_signals.index, buy_signals['Close'], label='Buy Signal', marker='^', color='green')
+    
+    sell_signals = data[data['Sell']]
+    plt.scatter(sell_signals.index, sell_signals['Close'], label='Sell Signal', marker='v', color='red')
+    
+    plt.title('Williams %R Strategy Buy and Sell Signals')
+    plt.xlabel('Date')
+    plt.ylabel('Close Price')
+    plt.legend(loc='upper left')
+    plt.show()
 
 
 
@@ -408,7 +461,27 @@ elif selected_option == "KDJ":
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
+    
+elif selected_option == "WR":
+    st.title('Williams %R Strategy')
 
+    # Create sliders
+    period = st.sidebar.slider('Period', min_value=1, max_value=50, value=14, step=1)
+    low_wr = st.sidebar.slider('Low WR', min_value=-100, max_value=0, value=-80, step=1)
+    high_wr = st.sidebar.slider('High WR', min_value=-100, max_value=0, value=-20, step=1)
+
+    # Calculate the strategy and ratios
+    df, win_loss_ratio, profit_ratio, latest_position = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr)
+
+    # Display the results
+    st.write(f"Win Loss Ratio: {win_loss_ratio}")
+    st.write(f"Profit Ratio: {profit_ratio}")
+    st.write(f"Latest Position: {latest_position}")
+    
+    # Plot the strategy
+    fig, ax = plt.subplots(figsize=(12, 6))
+    plot_strategy(df, ax)
+    st.pyplot(fig)
     
    
 
