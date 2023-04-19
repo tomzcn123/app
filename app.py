@@ -571,7 +571,7 @@ elif selected_option == "BB":
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
     
-elif selected_option == "Parabolic Sar":
+#elif selected_option == "Parabolic Sar":
    
 
     
