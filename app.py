@@ -499,7 +499,7 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
     win_loss = []
     profit = []
     
-    for i in range(1, len(data)):
+    for i in range(2, len(data)):
         prev_sar = sar
         data.at[i, 'SAR'] = sar
         
@@ -551,6 +551,7 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
     latest_position = position
     
     return data, win_loss_ratio, profit_ratio, latest_position
+
 
 def plot_parabolic_sar_strategy_and_sar(data):
     fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(12, 8), sharex=True)
