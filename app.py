@@ -569,7 +569,7 @@ def plot_parabolic_sar_strategy_and_sar(data):
     ax1.set_title('Parabolic SAR Strategy')
     ax1.set_ylabel('Close Price')
     ax1.legend(loc='best')
-    ax1.set_xlim(data.index[0], data.index[-1])
+    ax1.set_xlim(data.index[-1], data.index[0])
 
     # Plot the Parabolic SAR
     ax2.plot(data.index, data['SAR'], label='Parabolic SAR', color='blue', linestyle='--', alpha=0.7)
@@ -577,7 +577,7 @@ def plot_parabolic_sar_strategy_and_sar(data):
     ax2.set_xlabel('Date')
     ax2.set_ylabel('SAR Value')
     ax2.legend(loc='best')
-    ax2.set_xlim(data.index[0], data.index[-1])
+    ax2.set_xlim(data.index[-1], data.index[0])
 
     fig.tight_layout()
 
