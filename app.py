@@ -512,8 +512,8 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
                 ep = data.iloc[i]['High']
             else:
                 sar = prev_sar + af * (ep - prev_sar)
-                if data.iloc[i - 1]['Low'] < ep:
-                    ep = data.iloc[i - 1]['Low']
+                if data.iloc[i]['Low'] < ep:
+                    ep = data.iloc[i]['Low']
                     af = min(af + increment, maximum)
         else:
             if data.iloc[i]['High'] >= prev_sar:
@@ -523,24 +523,39 @@ def parabolic_sar_strategy_and_sar(data, start=0.02, increment=0.02, maximum=0.2
                 ep = data.iloc[i]['Low']
             else:
                 sar = prev_sar - af * (prev_sar - ep)
-                if data.iloc[i - 1]['High'] > ep:
-                    ep = data.iloc[i - 1]['High']
+                if data.iloc[i]['High'] > ep:
+                    ep = data.iloc[i]['High']
                     af = min(af + increment, maximum)
 
         # Strategy evaluation
-        if trend == 'Long' and position is None:
-            position = 'Long'
-            entry_price = data.iloc[i]['Close']
-        elif trend == 'Short' and position == 'Long':
-            exit_price = data.iloc[i]['Close']
-            pf = (exit_price - entry_price) / entry_price
-            profit.append(pf)
-            if pf > 0:
-                win_loss.append(1)
-            elif pf <= 0:
-                win_loss.append(0)
-            position = None
-            entry_price = None
+        if position is None:
+            if trend == 'Long':
+                position = 'Long'
+                entry_price = data.iloc[i]['Close']
+            elif trend == 'Short':
+                position = 'Short'
+                entry_price = data.iloc[i]['Close']
+        else:
+            if trend == 'Long' and position == 'Short':
+                exit_price = data.iloc[i]['Close']
+                pf = (entry_price - exit_price) / entry_price
+                profit.append(pf)
+                if pf > 0:
+                    win_loss.append(1)
+                elif pf <= 0:
+                    win_loss.append(0)
+                position = 'Long'
+                entry_price = data.iloc[i]['Close']
+            elif trend == 'Short' and position == 'Long':
+                exit_price = data.iloc[i]['Close']
+                pf = (exit_price - entry_price) / entry_price
+                profit.append(pf)
+                if pf > 0:
+                    win_loss.append(1)
+                elif pf <= 0:
+                    win_loss.append(0)
+                position = 'Short'
+                entry_price = data.iloc[i]['Close']
 
     win_loss_ratio = round(np.sum(win_loss) / len(win_loss), 3) if len(win_loss) > 0 else float('NaN')
     profit_ratio = round(np.sum(profit) / len(profit), 3) if len(profit) > 0 else float('NaN')
