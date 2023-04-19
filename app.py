@@ -397,19 +397,30 @@ def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20):
     profit_ratio = round(sum(profit) / len(profit), 3)
     return data, win_loss_ratio, profit_ratio, latest_position
 
-def plot_strategy(data, ax):
-    ax.plot(data['Close'], label='Close Price', alpha=0.4)
+def plot_wr_and_strategy(data):
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12), sharex=True)
     
+    # Plot buy and sell signals
+    ax1.plot(data['Close'], label='Close Price', alpha=0.4)
     buy_signals = data[data['Buy']]
-    ax.scatter(buy_signals.index, buy_signals['Close'], label='Buy Signal', marker='^', color='green')
-    
+    ax1.scatter(buy_signals.index, buy_signals['Close'], label='Buy Signal', marker='^', color='green')
     sell_signals = data[data['Sell']]
-    ax.scatter(sell_signals.index, sell_signals['Close'], label='Sell Signal', marker='v', color='red')
+    ax1.scatter(sell_signals.index, sell_signals['Close'], label='Sell Signal', marker='v', color='red')
+    ax1.set_title('Williams %R Strategy Buy and Sell Signals')
+    ax1.set_ylabel('Close Price')
+    ax1.legend(loc='upper left')
     
-    ax.set_title('Williams %R Strategy Buy and Sell Signals')
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Close Price')
-    ax.legend(loc='upper left')
+    # Plot Williams %R
+    ax2.plot(data['WR'], label='Williams %R', color='blue')
+    ax2.axhline(y=-80, color='r', linestyle='--', label='Low WR')
+    ax2.axhline(y=-20, color='g', linestyle='--', label='High WR')
+    ax2.set_title('Williams %R')
+    ax2.set_xlabel('Date')
+    ax2.set_ylabel('Williams %R')
+    ax2.legend(loc='upper left')
+    
+    return fig
+
 
 
 
@@ -473,8 +484,7 @@ elif selected_option == "WR":
     data, win_loss_ratio, profit_ratio, latest_position = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr)
     
     # Plot the strategy
-    fig, ax = plt.subplots(figsize=(12, 6))
-    plot_strategy(data, ax)
+    fig = plot_wr_and_strategy(data)
     st.pyplot(fig)
     
     # Display the results
