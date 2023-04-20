@@ -387,10 +387,10 @@ def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20, holding_per
     long_results, short_results = calculate_trade_results(data, holding_period)
 
     long_win_loss_ratio = long_results['winning_trades'] / (long_results['winning_trades'] + long_results['losing_trades'])
-    long_profit_ratio = long_results['total_profit'] / long_results['total_loss']
+    long_profit_ratio = sum(long_results['total_profit']) / len(long_results['total_profit'])
 
     short_win_loss_ratio = short_results['winning_trades'] / (short_results['winning_trades'] + short_results['losing_trades'])
-    short_profit_ratio = short_results['total_profit'] / short_results['total_loss']
+    short_profit_ratio = sum(short_results['total_profit']) / len(short_results['total_profit'])
 
     results[f'long_{holding_period}_days'] = {'win_loss_ratio': long_win_loss_ratio,'profit_ratio': long_profit_ratio,
         }
@@ -404,14 +404,12 @@ def calculate_trade_results(data, holding_period):
     long_results = {
         'winning_trades': 0,
         'losing_trades': 0,
-        'total_profit': 0,
-        'total_loss': 0,
+        'total_profit': [],
     }
     short_results = {
         'winning_trades': 0,
         'losing_trades': 0,
-        'total_profit': 0,
-        'total_loss': 0,
+        'total_profit': [],
     }
 
     for i in range(len(data) - holding_period):
@@ -419,19 +417,19 @@ def calculate_trade_results(data, holding_period):
             profit = data.iloc[i + holding_period]['Close'] - data.iloc[i]['Close']
             if profit > 0:
                 long_results['winning_trades'] += 1
-                long_results['total_profit'] += profit
+                long_results['total_profit'] += profit/data.iloc[i]['Close']
             else:
                 long_results['losing_trades'] += 1
-                long_results['total_loss'] += abs(profit)
+                long_results['total_profit'] += profit/data.iloc[i]['Close']
 
         if data.iloc[i]['Sell']:
             profit = data.iloc[i]['Close'] - data.iloc[i + holding_period]['Close']
             if profit > 0:
                 short_results['winning_trades'] += 1
-                short_results['total_profit'] += profit
+                short_results['total_profit'] += profit/data.iloc[i + holding_period]['Close']
             else:
                 short_results['losing_trades'] += 1
-                short_results['total_loss'] += abs(profit)
+                short_results['total_profit'] += profit/data.iloc[i + holding_period]['Close']
 
     return long_results, short_results
 
