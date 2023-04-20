@@ -655,6 +655,7 @@ elif selected_option == "Hammer Strategy":
     st.write(f"Latest Position: {position}")
     st.write(f"Current Bullish Hammer: {current_bullish_hammer}")
     st.write(f"Current Bearish Hammer: {current_bearish_hammer}")
+    st.write(data)
    
 
     
