@@ -434,30 +434,34 @@ def calculate_trade_results(data, holding_period):
 
     return long_results, short_results
 
+def plot_buy_sell_signals(data, streamlit=False):
+    plt.figure(figsize=(12, 6))
+    plt.plot(data['Close'], label='Close', alpha=0.5)
+    plt.scatter(data.index[data['Buy']], data.loc[data['Buy'], 'Close'], label='Buy', marker='^', color='g')
+    plt.scatter(data.index[data['Sell']], data.loc[data['Sell'], 'Close'], label='Sell', marker='v', color='r')
+    plt.title('Buy and Sell signals')
+    plt.xlabel('Date')
+    plt.ylabel('Close Price')
+    plt.legend(loc='best')
+    if streamlit:
+        st.pyplot(plt)
+    else:
+        plt.show()
 
-def plot_wr_and_strategy(data):
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12), sharex=True)
-    
-    # Plot buy and sell signals
-    ax1.plot(data['Close'], label='Close Price', alpha=0.4)
-    buy_signals = data[data['Buy']]
-    ax1.scatter(buy_signals.index, buy_signals['Close'], label='Buy Signal', marker='^', color='green')
-    sell_signals = data[data['Sell']]
-    ax1.scatter(sell_signals.index, sell_signals['Close'], label='Sell Signal', marker='v', color='red')
-    ax1.set_title('Williams %R Strategy Buy and Sell Signals')
-    ax1.set_ylabel('Close Price')
-    ax1.legend(loc='upper left')
-    
-    # Plot Williams %R
-    ax2.plot(data['WR'], label='Williams %R', color='blue')
-    ax2.axhline(y=-80, color='r', linestyle='--', label='Low WR')
-    ax2.axhline(y=-20, color='g', linestyle='--', label='High WR')
-    ax2.set_title('Williams %R')
-    ax2.set_xlabel('Date')
-    ax2.set_ylabel('Williams %R')
-    ax2.legend(loc='upper left')
-    
-    return fig
+def plot_wr(data, streamlit=False):
+    plt.figure(figsize=(12, 6))
+    plt.plot(data['WR'], label='Williams %R', color='b')
+    plt.axhline(y=-80, color='r', linestyle='--', label='Low %R')
+    plt.axhline(y=-20, color='g', linestyle='--', label='High %R')
+    plt.title('Williams %R')
+    plt.xlabel('Date')
+    plt.ylabel('Williams %R')
+    plt.legend(loc='best')
+    if streamlit:
+        st.pyplot(plt)
+    else:
+        plt.show()
+
 
 #Bollinger Band
 def bollinger_bands_strategy_and_bands(data, period=20):
@@ -769,12 +773,14 @@ elif selected_option == "WR":
     low_wr = st.sidebar.number_input("Low %R", min_value=-100, max_value=0, value=-80)
     high_wr = st.sidebar.number_input("High %R", min_value=-100, max_value=0, value=-20)
     holding_period = st.sidebar.slider("Holding period (days)", min_value=1, max_value=30, value=1, step=1, format="%d days")
-    results = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr, holding_period= holding_period)
-    # Plot the strategy
-    #fig = plot_wr_and_strategy(data)
-    #st.pyplot(fig)
-    
-    
+    data, results = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr, holding_period=holding_period)
+    # Plot buy and sell signals graph
+    st.write("Buy and Sell signals:")
+    plot_buy_sell_signals(data, streamlit=True)
+
+    # Plot Williams %R graph
+    st.write("Williams %R:")
+    plot_wr(data, streamlit=True)
     # Display results
     st.write("Results:")
     for key, value in results.items():
