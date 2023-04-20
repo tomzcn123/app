@@ -30,9 +30,9 @@ selected_option = st.sidebar.selectbox("Choose an potential opportunity", option
 stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
 
 # Plot the stock data with Plotly
-fig = px.line(stock_data, x=stock_data.index, y='Close', title=f'{stock_symbol} Closing Price')
-st.write("Stock Price Chart")
-st.plotly_chart(fig)
+#fig = px.line(stock_data, x=stock_data.index, y='Close', title=f'{stock_symbol} Closing Price')
+#st.write("Stock Price Chart")
+#st.plotly_chart(fig)
 
 # Display the stock data as a table
 #st.write("Stock Data")
@@ -681,6 +681,7 @@ if selected_option == 'SMA_EMA':
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Current Recommended Position: ", position)
+    st.write(data)
     
 elif selected_option == "MACD":
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=12, step=1)
@@ -692,6 +693,7 @@ elif selected_option == "MACD":
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Latest Position: ", latest_position)
+    st.write(data)
     
 elif selected_option == "RSI":
     rsi_period = st.sidebar.slider("RSI Period", 1, 100, 14)
@@ -705,6 +707,7 @@ elif selected_option == "RSI":
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
+    st.write(data)
 
 elif selected_option == "KDJ":
     k_period = st.sidebar.slider('K Period', min_value=1, max_value=100, value=14)
@@ -718,6 +721,7 @@ elif selected_option == "KDJ":
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
+    st.write(data)
     
 elif selected_option == "WR":
     st.title('Williams %R Strategy')
@@ -734,6 +738,7 @@ elif selected_option == "WR":
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
+    st.write(data)
     
 elif selected_option == "BB":
     st.title('Bollinger Bands Strategy')
@@ -752,6 +757,7 @@ elif selected_option == "BB":
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
+    st.write(data)
     
 elif selected_option == "Hammer Strategy":
     _lock = RendererAgg.lock
