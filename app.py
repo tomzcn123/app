@@ -22,7 +22,7 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Hammer Strategy']
+options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Hammer Strategy','Engulfing Strategy']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
@@ -520,8 +520,8 @@ def hammer_strategy(data):
             current_signal = 'Sell'
 
     if len(win_loss) > 0:
-        win_loss_ratio = sum(win_loss) / len(win_loss)
-        profit_ratio = sum(profit) / len(profit)
+        win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+        profit_ratio = round(sum(profit) / len(profit), 3)
     else:
         win_loss_ratio = None
         profit_ratio = None
@@ -545,7 +545,65 @@ def plot_hammer_strategy_and_patterns(data):
     ax.legend(loc='best')
 
     plt.show()
+   
+#Engulfing Strategy
+def engulfing_strategy(data):
+    data['bullish_engulfing'] = (data['Open'].shift(1) > data['Close'].shift(1)) & \
+                              (data['Close'] > data['Open']) & \
+                              ((data['Close'] - data['Open']) > (data['Open'].shift(1) - data['Close'].shift(1)))
+    data['bearish_engulfing'] = (data['Open'].shift(1) < data['Close'].shift(1)) & \
+                              (data['Close'] < data['Open']) & \
+                              ((data['Close'] - data['Open']) < (data['Open'].shift(1) - data['Close'].shift(1)))
+    win_loss = []
+    profit = []
+    position = None
+    entry_price = None
+    current_signal = None
 
+    for i in range(len(data)):
+        if data.iloc[i]['bullish_engulfing'] and position is None:
+            position = 'Long'
+            entry_price = data.iloc[i]['Close']
+            current_signal = 'Buy'
+
+        if data.iloc[i]['bearish_engulfingr'] and position == 'Long':
+            exit_price = data.iloc[i]['Close']
+            pf = (exit_price - entry_price) / entry_price
+            profit.append(pf)
+            if pf > 0:
+                win_loss.append(1)
+            elif pf <= 0:
+                win_loss.append(0)
+            position = None
+            entry_price = None
+            current_signal = 'Sell'
+
+    if len(win_loss) > 0:
+        win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+        profit_ratio = round(sum(profit) / len(profit), 3)
+    else:
+        win_loss_ratio = None
+        profit_ratio = None
+
+    return data,win_loss_ratio, profit_ratio, position, current_signal
+
+
+def plot_engulfing_strategy_and_patterns(data):
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    buy_signals = data[data['bullish_engulfing']]
+    sell_signals = data[data['bearish_engulfing']]
+
+    ax.plot(data.index, data['Close'], label='Close Price', alpha=0.5)
+    ax.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', label='Buy Signal / Bullish Engulfing', alpha=1)
+    ax.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', label='Sell Signal / Bearish Engulfing', alpha=1)
+
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Close Price')
+    ax.set_title('Engulfing Strategy and Engulfing Patterns')
+    ax.legend(loc='best')
+
+    plt.show()
 
 
 
@@ -635,7 +693,6 @@ elif selected_option == "BB":
     st.write(f"Latest Position: {latest_position}")
     
 elif selected_option == "Hammer Strategy":
-    
     _lock = RendererAgg.lock
     data,win_loss_ratio, profit_ratio, position, current_signal = hammer_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -648,7 +705,19 @@ elif selected_option == "Hammer Strategy":
     st.write(f"Current Signal: {current_signal}")
     st.write(data)
    
-
+elif selected_option == "Engulfing Strategy":
+    _lock = RendererAgg.lock
+    data,win_loss_ratio, profit_ratio, position, current_signal = engulfing_strategy(stock_data)
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    with _lock:
+        st.pyplot(plot_engulfing_strategy_and_patterns(data))
+    # Display strategy results
+    st.write(f"Win Loss Ratio: {win_loss_ratio}")
+    st.write(f"Profit Ratio: {profit_ratio}")
+    st.write(f"Latest Position: {position}")
+    st.write(f"Current Signal: {current_signal}")
+    st.write(data)
+   
     
 
     
