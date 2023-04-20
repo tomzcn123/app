@@ -7,6 +7,7 @@ import datetime as dt
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
+from matplotlib.backends.backend_agg import RendererAgg
 
 
 # Set up the app title and description
@@ -20,7 +21,7 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Parabolic Sar']
+options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Hammer Strategy']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
@@ -484,6 +485,77 @@ def plot_bollinger_bands_strategy_and_bands(data):
     ax2.legend(loc='upper left')
     return fig
 
+#Hammer Strategy
+def hammer_strategy(data):
+    data['bullish_hammer'] = ((data['Open'] - data['High']).abs() <= 0.01 * (data['High'] - data['Low'])) & \
+                           ((data['Close'] - data['Low']).abs() <= 0.01 * (data['High'] - data['Low'])) & \
+                           ((data['Close'] > data['Open']) & ((data['Close'] - data['Open']) > 0.6 * (data['High'] - data['Low'])))
+    data['bearish_hammer'] = ((data['High'] - data['Open']).abs() <= 0.01 * (data['High'] - data['Low'])) & \
+                           ((data['Close'] - data['Low']).abs() <= 0.01 * (data['High'] - data['Low'])) & \
+                           ((data['Open'] > data['Close']) & ((data['Open'] - data['Close']) > 0.6 * (data['High'] - data['Low'])))
+
+    position = None
+    entry_price = None
+    win_loss = []
+    profit = []
+
+    for i in range(1, len(data)):
+        bullish_hammer = data.iloc[i]['bullish_hammer']
+        bearish_hammer = data.iloc[i]['bearish_hammer']
+
+        if bullish_hammer and position is None:
+            position = 'Long'
+            entry_price = data.iloc[i]['Close']
+        elif bearish_hammer and position == 'Long':
+            exit_price = data.iloc[i]['Close']
+            pf = (exit_price - entry_price) / entry_price
+            profit.append(pf)
+            if pf > 0:
+                win_loss.append(1)
+            elif pf <= 0:
+                win_loss.append(0)
+            position = None
+            entry_price = None
+
+        if bearish_hammer and position is None:
+            position = 'Short'
+            entry_price = data.iloc[i]['Close']
+        elif bullish_hammer and position == 'Short':
+            exit_price = data.iloc[i]['Close']
+            pf = (entry_price - exit_price) / entry_price
+            profit.append(pf)
+            if pf > 0:
+                win_loss.append(1)
+            elif pf <= 0:
+                win_loss.append(0)
+            position = None
+            entry_price = None
+
+    win_loss_ratio = round(np.sum(win_loss) / len(win_loss), 3) if len(win_loss) > 0 else float('NaN')
+    profit_ratio = round(np.sum(profit) / len(profit), 3) if len(profit) > 0 else float('NaN')
+    current_bullish_hammer = data.iloc[-1]['bullish_hammer']
+    current_bearish_hammer = data.iloc[-1]['bearish_hammer']
+
+    return win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer
+
+
+def plot_hammer_strategy_and_patterns(data):
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    buy_signals = data[data['bullish_hammer']]
+    sell_signals = data[data['bearish_hammer']]
+
+    ax.plot(data.index, data['Close'], label='Close Price', alpha=0.5)
+    ax.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', label='Buy Signal / Bullish Hammer', alpha=1)
+    ax.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', label='Sell Signal / Bearish Hammer', alpha=1)
+
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Close Price')
+    ax.set_title('Hammer Strategy and Hammer Patterns')
+    ax.legend(loc='best')
+
+    plt.show()
+
 
 
 
@@ -571,7 +643,18 @@ elif selected_option == "BB":
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
     
-#elif selected_option == "Parabolic Sar":
+elif selected_option == "Hammer Strategy":
+   
+    _lock = RendererAgg.lock
+    win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer = hammer_strategy(stock_data)
+    with _lock:
+    st.pyplot(plot_hammer_strategy_and_patterns(data))
+    # Display strategy results
+    st.write(f"Win Loss Ratio: {win_loss_ratio}")
+    st.write(f"Profit Ratio: {profit_ratio}")
+    st.write(f"Latest Position: {position}")
+    st.write(f"Current Bullish Hammer: {current_bullish_hammer}")
+    st.write(f"Current Bearish Hammer: {current_bearish_hammer}")
    
 
     
