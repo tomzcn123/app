@@ -487,12 +487,12 @@ def plot_bollinger_bands_strategy_and_bands(data):
 
 #Hammer Strategy
 def hammer_strategy(data):
-    data['bullish_hammer'] = ((data['Open'] - data['High']).abs() <= 0.01 * (data['High'] - data['Low'])) & \
-                           ((data['Close'] - data['Low']).abs() <= 0.01 * (data['High'] - data['Low'])) & \
-                           ((data['Close'] > data['Open']) & ((data['Close'] - data['Open']) > 0.6 * (data['High'] - data['Low'])))
-    data['bearish_hammer'] = ((data['High'] - data['Open']).abs() <= 0.01 * (data['High'] - data['Low'])) & \
-                           ((data['Close'] - data['Low']).abs() <= 0.01 * (data['High'] - data['Low'])) & \
-                           ((data['Open'] > data['Close']) & ((data['Open'] - data['Close']) > 0.6 * (data['High'] - data['Low'])))
+    data['bullish_hammer'] = ((data['Open'] - data['High']).abs() <= 0.3 * (data['High'] - data['Low'])) & \
+                           ((data['Close'] - data['Low']).abs() <= 0.5 * (data['High'] - data['Low'])) & \
+                           ((data['Close'] > data['Open']) & ((data['Close'] - data['Open']) > 0.5 * (data['High'] - data['Low'])))
+    data['bearish_hammer'] = ((data['High'] - data['Open']).abs() <= 0.3 * (data['High'] - data['Low'])) & \
+                           ((data['Close'] - data['Low']).abs() <= 0.5 * (data['High'] - data['Low'])) & \
+                           ((data['Open'] > data['Close']) & ((data['Open'] - data['Close']) > 0.5 * (data['High'] - data['Low'])))
 
     position = None
     entry_price = None
