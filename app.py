@@ -536,7 +536,7 @@ def hammer_strategy(data):
     current_bullish_hammer = data.iloc[-1]['bullish_hammer']
     current_bearish_hammer = data.iloc[-1]['bearish_hammer']
 
-    return win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer
+    return data,win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer
 
 
 def plot_hammer_strategy_and_patterns(data):
@@ -646,7 +646,7 @@ elif selected_option == "BB":
 elif selected_option == "Hammer Strategy":
    
     _lock = RendererAgg.lock
-    win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer = hammer_strategy(stock_data)
+    data,win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer = hammer_strategy(stock_data)
     with _lock:
         st.pyplot(plot_hammer_strategy_and_patterns(data))
     # Display strategy results
