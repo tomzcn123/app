@@ -136,9 +136,9 @@ def macd_strategy(data, short_period, long_period, signal_period):
                 win_loss.append(1 if pf > 0 else 0)
                 position = None
                 entry_price = None
-
             position = 'Long'
             entry_price = data.iloc[i]['Close']
+            
         elif current_signal == -1 and previous_signal != -1:
             if position == 'Long':  # Close long position
                 exit_price = data.iloc[i]['Close']
@@ -147,7 +147,6 @@ def macd_strategy(data, short_period, long_period, signal_period):
                 win_loss.append(1 if pf > 0 else 0)
                 position = None
                 entry_price = None
-
             position = 'Short'
             entry_price = data.iloc[i]['Close']
 
