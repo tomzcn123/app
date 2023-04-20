@@ -504,11 +504,11 @@ def hammer_strategy(data):
     for i in range(len(data)):
         if data.iloc[i]['bullish_hammer'] and position is None:
             position = 'Long'
-            entry_price = data.iloc[i]['close']
+            entry_price = data.iloc[i]['Close']
             current_signal = 'Buy'
 
         if data.iloc[i]['bearish_hammer'] and position == 'Long':
-            exit_price = data.iloc[i]['close']
+            exit_price = data.iloc[i]['Close']
             pf = (exit_price - entry_price) / entry_price
             profit.append(pf)
             if pf > 0:
