@@ -417,19 +417,19 @@ def calculate_trade_results(data, holding_period):
             profit = data.iloc[i + holding_period]['Close'] - data.iloc[i]['Close']
             if profit > 0:
                 long_results['winning_trades'] += 1
-                long_results['total_profit'] += profit/data.iloc[i]['Close']
+                long_results['total_profit'].append(profit/data.iloc[i]['Close'])
             else:
                 long_results['losing_trades'] += 1
-                long_results['total_profit'] += profit/data.iloc[i]['Close']
+                long_results['total_profit'].append(profit/data.iloc[i]['Close'])
 
         if data.iloc[i]['Sell']:
             profit = data.iloc[i]['Close'] - data.iloc[i + holding_period]['Close']
             if profit > 0:
                 short_results['winning_trades'] += 1
-                short_results['total_profit'] += profit/data.iloc[i + holding_period]['Close']
+                short_results['total_profit'].append(profit/data.iloc[i + holding_period]['Close'])
             else:
                 short_results['losing_trades'] += 1
-                short_results['total_profit'] += profit/data.iloc[i + holding_period]['Close']
+                short_results['total_profit'].append(profit/data.iloc[i + holding_period]['Close'])
 
     return long_results, short_results
 
