@@ -373,45 +373,71 @@ def plot_kdj_signals(data):
 
 
 #WR strategy
-def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20):
+def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20, holding_periods=[1, 5, 10]):
     data['High_max'] = data['High'].rolling(window=period).max()
     data['Low_min'] = data['Low'].rolling(window=period).min()
     data['WR'] = -100 * ((data['High_max'] - data['Close']) / (data['High_max'] - data['Low_min']))
-    
+
     data['Buy'] = ((data['WR'] > low_wr) & (data['WR'].shift(1) <= low_wr))
     data['Sell'] = ((data['WR'] < high_wr) & (data['WR'].shift(1) >= high_wr))
 
-    win_loss = []
-    profit = []
-    position = None
-    entry_price = None
-    latest_position = None
+    results = {}
+    for holding_period in holding_periods:
+        long_results, short_results = calculate_trade_results(data, holding_period)
 
-    for i in range(len(data)):
-        if data.iloc[i]['Buy'] and position is None:
-            position = 'Long'
-            entry_price = data.iloc[i]['Close']
-        elif data.iloc[i]['Sell'] and position == 'Long':
-            exit_price = data.iloc[i]['Close']
-            pf = (exit_price - entry_price) / entry_price
-            profit.append(pf)
-            if pf > 0:
-                win_loss.append(1)
-            elif pf <= 0:
-                win_loss.append(0)
-            position = None
-            entry_price = None
-        
-        latest_position = position
+        long_win_loss_ratio = long_results['winning_trades'] / (long_results['winning_trades'] + long_results['losing_trades'])
+        long_profit_ratio = long_results['total_profit'] / long_results['total_loss']
 
-    if len(win_loss) > 0:
-        win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
-        profit_ratio = round(sum(profit) / len(profit), 3)
-    else:
-        win_loss_ratio = None
-        profit_ratio = None
-        
-    return data, win_loss_ratio, profit_ratio, latest_position
+        short_win_loss_ratio = short_results['winning_trades'] / (short_results['winning_trades'] + short_results['losing_trades'])
+        short_profit_ratio = short_results['total_profit'] / short_results['total_loss']
+
+        results[f'long_{holding_period}_days'] = {
+            'win_loss_ratio': long_win_loss_ratio,
+            'profit_ratio': long_profit_ratio,
+        }
+
+        results[f'short_{holding_period}_days'] = {
+            'win_loss_ratio': short_win_loss_ratio,
+            'profit_ratio': short_profit_ratio,
+        }
+
+    return results
+
+def calculate_trade_results(data, holding_period):
+    long_results = {
+        'winning_trades': 0,
+        'losing_trades': 0,
+        'total_profit': 0,
+        'total_loss': 0,
+    }
+    short_results = {
+        'winning_trades': 0,
+        'losing_trades': 0,
+        'total_profit': 0,
+        'total_loss': 0,
+    }
+
+    for i in range(len(data) - holding_period):
+        if data.iloc[i]['Buy']:
+            profit = data.iloc[i + holding_period]['Close'] - data.iloc[i]['Close']
+            if profit > 0:
+                long_results['winning_trades'] += 1
+                long_results['total_profit'] += profit
+            else:
+                long_results['losing_trades'] += 1
+                long_results['total_loss'] += abs(profit)
+
+        if data.iloc[i]['Sell']:
+            profit = data.iloc[i]['Close'] - data.iloc[i + holding_period]['Close']
+            if profit > 0:
+                short_results['winning_trades'] += 1
+                short_results['total_profit'] += profit
+            else:
+                short_results['losing_trades'] += 1
+                short_results['total_loss'] += abs(profit)
+
+    return long_results, short_results
+
 
 def plot_wr_and_strategy(data):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12), sharex=True)
@@ -743,19 +769,20 @@ elif selected_option == "KDJ":
     
 elif selected_option == "WR":
     st.title('Williams %R Strategy')
-    # Create sliders
-    period = st.sidebar.slider('Period', min_value=1, max_value=50, value=14, step=1)
-    low_wr = st.sidebar.slider('Low WR', min_value=-100, max_value=0, value=-80, step=1)
-    high_wr = st.sidebar.slider('High WR', min_value=-100, max_value=0, value=-20, step=1)
-    # Calculate the strategy and ratios
-    data, win_loss_ratio, profit_ratio, latest_position = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr)
+    period = st.sidebar.number_input("Period", min_value=1, value=14)
+    low_wr = st.sidebar.number_input("Low %R", min_value=-100, max_value=0, value=-80)
+    high_wr = st.sidebar.number_input("High %R", min_value=-100, max_value=0, value=-20)
+    holding_period = st.sidebar.slider("Holding period (days)", min_value=1, max_value=30, value=(1, 5, 10), step=1, format="%d days")
+    results = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr, holding_periods=list(holding_period))
     # Plot the strategy
-    fig = plot_wr_and_strategy(data)
-    st.pyplot(fig)
-    # Display the results
-    st.write(f"Win Loss Ratio: {win_loss_ratio}")
-    st.write(f"Profit Ratio: {profit_ratio}")
-    st.write(f"Latest Position: {latest_position}")
+    #fig = plot_wr_and_strategy(data)
+    #st.pyplot(fig)
+    
+    
+    # Display results
+    st.write("Results:")
+    for key, value in results.items():
+        st.write(f"{key}: Win-loss ratio: {value['win_loss_ratio']:.2f}, Profit ratio: {value['profit_ratio']:.2f}")
     st.write(data)
     
 elif selected_option == "BB":
