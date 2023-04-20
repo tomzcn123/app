@@ -566,7 +566,7 @@ def engulfing_strategy(data):
             entry_price = data.iloc[i]['Close']
             current_signal = 'Buy'
 
-        if data.iloc[i]['bearish_engulfingr'] and position == 'Long':
+        if data.iloc[i]['bearish_engulfing'] and position == 'Long':
             exit_price = data.iloc[i]['Close']
             pf = (exit_price - entry_price) / entry_price
             profit.append(pf)
