@@ -245,9 +245,14 @@ def rsi_strategy_single(data, rsi_period, rsi_low, rsi_high):
         # Save the latest position
         latest_position = position
 
-    win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
-    profit_ratio = round(sum(profit) / len(profit), 3)
-    return data, win_loss_ratio, profit_ratio, latest_position
+    if len(win_loss) > 0:
+        win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+        profit_ratio = round(sum(profit) / len(profit), 3)
+    else:
+        win_loss_ratio = None
+        profit_ratio = None
+        
+    return data, win_loss_ratio, profit_ratio,latest_position
 
 def plot_rsi_strategy(data):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
@@ -326,10 +331,14 @@ def kdj_strategy(data, k_period=14, d_period=3, j_period=3, buy_level=20, sell_l
         # Save the latest position
         latest_position = position
 
-    win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
-    profit_ratio = round(sum(profit) / len(profit), 3)
+    if len(win_loss) > 0:
+        win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+        profit_ratio = round(sum(profit) / len(profit), 3)
+    else:
+        win_loss_ratio = None
+        profit_ratio = None
 
-    return data, win_loss_ratio, profit_ratio, latest_position
+    return data,win_loss_ratio,profit_ratio, latest_position
 
 def plot_kdj_signals(data):
     # Create subplots
@@ -395,8 +404,13 @@ def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20):
         
         latest_position = position
 
-    win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
-    profit_ratio = round(sum(profit) / len(profit), 3)
+    if len(win_loss) > 0:
+        win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+        profit_ratio = round(sum(profit) / len(profit), 3)
+    else:
+        win_loss_ratio = None
+        profit_ratio = None
+        
     return data, win_loss_ratio, profit_ratio, latest_position
 
 def plot_wr_and_strategy(data):
@@ -456,8 +470,12 @@ def bollinger_bands_strategy_and_bands(data, period=20):
             position = None
             entry_price = None
     
-    win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
-    profit_ratio = round(sum(profit) / len(profit), 3)
+    if len(win_loss) > 0:
+        win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
+        profit_ratio = round(sum(profit) / len(profit), 3)
+    else:
+        win_loss_ratio = None
+        profit_ratio = None
     latest_position = position
     
     return data, win_loss_ratio, profit_ratio, latest_position
