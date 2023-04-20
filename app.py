@@ -373,7 +373,7 @@ def plot_kdj_signals(data):
 
 
 #WR strategy
-def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20, holding_periods=1):
+def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20, holding_period=1):
     data['High_max'] = data['High'].rolling(window=period).max()
     data['Low_min'] = data['Low'].rolling(window=period).min()
     data['WR'] = -100 * ((data['High_max'] - data['Close']) / (data['High_max'] - data['Low_min']))
@@ -382,23 +382,19 @@ def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20, holding_per
     data['Sell'] = ((data['WR'] < high_wr) & (data['WR'].shift(1) >= high_wr))
 
     results = {}
-    for holding_period in holding_periods:
-        long_results, short_results = calculate_trade_results(data, holding_period)
+    
+    long_results, short_results = calculate_trade_results(data, holding_period)
 
-        long_win_loss_ratio = long_results['winning_trades'] / (long_results['winning_trades'] + long_results['losing_trades'])
-        long_profit_ratio = long_results['total_profit'] / long_results['total_loss']
+    long_win_loss_ratio = long_results['winning_trades'] / (long_results['winning_trades'] + long_results['losing_trades'])
+    long_profit_ratio = long_results['total_profit'] / long_results['total_loss']
 
-        short_win_loss_ratio = short_results['winning_trades'] / (short_results['winning_trades'] + short_results['losing_trades'])
-        short_profit_ratio = short_results['total_profit'] / short_results['total_loss']
+    short_win_loss_ratio = short_results['winning_trades'] / (short_results['winning_trades'] + short_results['losing_trades'])
+    short_profit_ratio = short_results['total_profit'] / short_results['total_loss']
 
-        results[f'long_{holding_period}_days'] = {
-            'win_loss_ratio': long_win_loss_ratio,
-            'profit_ratio': long_profit_ratio,
+    results[f'long_{holding_period}_days'] = {'win_loss_ratio': long_win_loss_ratio,'profit_ratio': long_profit_ratio,
         }
 
-        results[f'short_{holding_period}_days'] = {
-            'win_loss_ratio': short_win_loss_ratio,
-            'profit_ratio': short_profit_ratio,
+    results[f'short_{holding_period}_days'] = {'win_loss_ratio': short_win_loss_ratio,'profit_ratio': short_profit_ratio,
         }
 
     return results
