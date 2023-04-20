@@ -35,8 +35,8 @@ st.write("Stock Price Chart")
 st.plotly_chart(fig)
 
 # Display the stock data as a table
-st.write("Stock Data")
-st.write(stock_data)
+#st.write("Stock Data")
+#st.write(stock_data)
 
 
 # SMA_EMA strategy
