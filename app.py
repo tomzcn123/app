@@ -540,16 +540,22 @@ def hammer_strategy(data):
     return data,win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer
 
 
-def plot_candlestick_hammer_strategy(data):
-    hammer_buy = data[data['bullish_hammer']]
-    hammer_sell = data[data['bearish_hammer']]
+def plot_hammer_strategy_and_patterns(data):
+    fig, ax = plt.subplots(figsize=(12, 6))
 
-    apd = [
-        mpf.make_addplot(hammer_buy['Close'], type='scatter', markersize=100, marker='^', color='g', panel=0),
-        mpf.make_addplot(hammer_sell['Close'], type='scatter', markersize=100, marker='v', color='r', panel=0)
-    ]
+    buy_signals = data[data['bullish_hammer']]
+    sell_signals = data[data['bearish_hammer']]
 
-    mpf.plot(data, type='candle', addplot=apd, volume=True, figscale=1.2, style='yahoo', title='Candlestick Chart with Hammer Strategy Signals')
+    ax.plot(data.index, data['Close'], label='Close Price', alpha=0.5)
+    ax.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', label='Buy Signal / Bullish Hammer', alpha=1)
+    ax.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', label='Sell Signal / Bearish Hammer', alpha=1)
+
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Close Price')
+    ax.set_title('Hammer Strategy and Hammer Patterns')
+    ax.legend(loc='best')
+
+    plt.show()
 
 
 
@@ -644,7 +650,7 @@ elif selected_option == "Hammer Strategy":
     _lock = RendererAgg.lock
     data,win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer = hammer_strategy(stock_data)
     with _lock:
-        plot_candlestick_hammer_strategy(data)
+        st.pyplot(plot_hammer_strategy_and_patterns(data))
     # Display strategy results
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
