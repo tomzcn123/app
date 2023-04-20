@@ -608,10 +608,10 @@ def plot_engulfing_strategy_and_patterns(data):
     
 #Kicker Strategy
 def kicker_strategy(data):
-    data['bullish_kicker'] = (data['Open'].shift(1) > data['Close'].shift(1)) & \
+    data['bearish_kicker'] = (data['Open'].shift(1) > data['Close'].shift(1)) & \
                            (data['Open'] < data['Close']) & \
                            (data['Close'] > data['Open'])
-    data['bearish_kicker'] = (data['Open'].shift(1) < data['Close'].shift(1)) & \
+    data['bullish_kicker'] = (data['Open'].shift(1) < data['Close'].shift(1)) & \
                            (data['Open'] > data['Close']) & \
                            (data['Close'] < data['Open'])
 
