@@ -779,7 +779,7 @@ elif selected_option == "Engulfing Strategy":
     st.write(f"Current Signal: {current_signal}")
     st.write(data)
     
- elif selected_option == "Kicker Strategy":
+elif selected_option == "Kicker Strategy":
     _lock = RendererAgg.lock
     data,win_loss_ratio, profit_ratio, position, current_signal = kicker_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
