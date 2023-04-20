@@ -646,9 +646,10 @@ elif selected_option == "BB":
     st.write(f"Latest Position: {latest_position}")
     
 elif selected_option == "Hammer Strategy":
-   
+    
     _lock = RendererAgg.lock
     data,win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer = hammer_strategy(stock_data)
+    st.set_option('deprecation.showPyplotGlobalUse', False)
     with _lock:
         st.pyplot(plot_hammer_strategy_and_patterns(data))
     # Display strategy results
