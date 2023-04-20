@@ -374,8 +374,9 @@ def plot_kdj_signals(data):
 
 #WR strategy
 def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20, holding_period=1):
-    data['Date'] = pd.to_datetime(data['Date'])
-    data.set_index('Date', inplace=True)
+    if 'Date' in data.columns:
+        data['Date'] = pd.to_datetime(data['Date'])
+        data.set_index('Date', inplace=True)
     data['High_max'] = data['High'].rolling(window=period).max()
     data['Low_min'] = data['Low'].rolling(window=period).min()
     data['WR'] = -100 * ((data['High_max'] - data['Close']) / (data['High_max'] - data['Low_min']))
