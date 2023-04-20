@@ -495,20 +495,20 @@ def hammer_strategy(data):
                            ((data['Close'] - data['Low']).abs() <= 0.5 * (data['High'] - data['Low'])) & \
                            ((data['Open'] > data['Close']) & ((data['Open'] - data['Close']) > 0.5 * (data['High'] - data['Low'])))
 
-    position = None
-    entry_price = None
     win_loss = []
     profit = []
+    position = None
+    entry_price = None
+    current_signal = None
 
-    for i in range(1, len(data)):
-        bullish_hammer = data.iloc[i]['bullish_hammer']
-        bearish_hammer = data.iloc[i]['bearish_hammer']
-
-        if bullish_hammer and position is None:
+    for i in range(len(data)):
+        if data.iloc[i]['bullish_hammer'] and position is None:
             position = 'Long'
-            entry_price = data.iloc[i]['Close']
-        elif bearish_hammer and position == 'Long':
-            exit_price = data.iloc[i]['Close']
+            entry_price = data.iloc[i]['close']
+            current_signal = 'Buy'
+
+        if data.iloc[i]['bearish_hammer'] and position == 'Long':
+            exit_price = data.iloc[i]['close']
             pf = (exit_price - entry_price) / entry_price
             profit.append(pf)
             if pf > 0:
@@ -517,27 +517,16 @@ def hammer_strategy(data):
                 win_loss.append(0)
             position = None
             entry_price = None
+            current_signal = 'Sell'
 
-        if bearish_hammer and position is None:
-            position = 'Short'
-            entry_price = data.iloc[i]['Close']
-        elif bullish_hammer and position == 'Short':
-            exit_price = data.iloc[i]['Close']
-            pf = (entry_price - exit_price) / entry_price
-            profit.append(pf)
-            if pf > 0:
-                win_loss.append(1)
-            elif pf <= 0:
-                win_loss.append(0)
-            position = None
-            entry_price = None
+    if len(win_loss) > 0:
+        win_loss_ratio = sum(win_loss) / len(win_loss)
+        profit_ratio = sum(profit) / len(profit)
+    else:
+        win_loss_ratio = None
+        profit_ratio = None
 
-    win_loss_ratio = round(np.sum(win_loss) / len(win_loss), 3) if len(win_loss) > 0 else float('NaN')
-    profit_ratio = round(np.sum(profit) / len(profit), 3) if len(profit) > 0 else float('NaN')
-    current_bullish_hammer = data.iloc[-1]['bullish_hammer']
-    current_bearish_hammer = data.iloc[-1]['bearish_hammer']
-
-    return data,win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer
+    return data,win_loss_ratio, profit_ratio, position, current_signal
 
 
 def plot_hammer_strategy_and_patterns(data):
@@ -648,7 +637,7 @@ elif selected_option == "BB":
 elif selected_option == "Hammer Strategy":
     
     _lock = RendererAgg.lock
-    data,win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer = hammer_strategy(stock_data)
+    data,win_loss_ratio, profit_ratio, position, current_signal = hammer_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
     with _lock:
         st.pyplot(plot_hammer_strategy_and_patterns(data))
@@ -656,8 +645,7 @@ elif selected_option == "Hammer Strategy":
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {position}")
-    st.write(f"Current Bullish Hammer: {current_bullish_hammer}")
-    st.write(f"Current Bearish Hammer: {current_bearish_hammer}")
+    st.write(f"Current Bullish Hammer: {current_signal}")
     st.write(data)
    
 
