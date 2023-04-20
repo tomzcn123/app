@@ -548,10 +548,10 @@ def plot_hammer_strategy_and_patterns(data):
    
 #Engulfing Strategy
 def engulfing_strategy(data):
-    data['bullish_engulfing'] = (data['Open'].shift(1) > data['Close'].shift(1)) & \
+    data['bearish_engulfing'] = (data['Open'].shift(1) > data['Close'].shift(1)) & \
                               (data['Close'] > data['Open']) & \
                               ((data['Close'] - data['Open']) > (data['Open'].shift(1) - data['Close'].shift(1)))
-    data['bearish_engulfing'] = (data['Open'].shift(1) < data['Close'].shift(1)) & \
+    data['bullish_engulfing'] = (data['Open'].shift(1) < data['Close'].shift(1)) & \
                               (data['Close'] < data['Open']) & \
                               ((data['Close'] - data['Open']) < (data['Open'].shift(1) - data['Close'].shift(1)))
     win_loss = []
