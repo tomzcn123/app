@@ -648,7 +648,7 @@ elif selected_option == "Hammer Strategy":
     _lock = RendererAgg.lock
     win_loss_ratio, profit_ratio, position, current_bullish_hammer, current_bearish_hammer = hammer_strategy(stock_data)
     with _lock:
-    st.pyplot(plot_hammer_strategy_and_patterns(data))
+        st.pyplot(plot_hammer_strategy_and_patterns(data))
     # Display strategy results
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
