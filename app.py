@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 from matplotlib.backends.backend_agg import RendererAgg
+import mplfinance as mpf
 
 
 # Set up the app title and description
