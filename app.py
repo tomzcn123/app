@@ -535,9 +535,9 @@ def plot_hammer_strategy_and_patterns(data):
     buy_signals = data[data['bullish_hammer']]
     sell_signals = data[data['bearish_hammer']]
 
-    ax.plot(data.index, data['Close'], label='Close Price', alpha=0.5)
-    ax.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', label='Buy Signal / Bullish Hammer', alpha=1)
-    ax.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', label='Sell Signal / Bearish Hammer', alpha=1)
+    ax.plot(data.index, data['close'], label='Close Price', alpha=0.5)
+    ax.scatter(buy_signals.index, buy_signals['close'], marker='^', color='g', label='Buy Signal / Bullish Hammer', alpha=1)
+    ax.scatter(sell_signals.index, sell_signals['close'], marker='v', color='r', label='Sell Signal / Bearish Hammer', alpha=1)
 
     ax.set_xlabel('Date')
     ax.set_ylabel('Close Price')
@@ -639,13 +639,13 @@ elif selected_option == "Hammer Strategy":
     _lock = RendererAgg.lock
     data,win_loss_ratio, profit_ratio, position, current_signal = hammer_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
-    #with _lock:
-        #st.pyplot(plot_hammer_strategy_and_patterns(data))
+    with _lock:
+        st.pyplot(plot_hammer_strategy_and_patterns(data))
     # Display strategy results
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {position}")
-    st.write(f"Current Bullish Hammer: {current_signal}")
+    st.write(f"Current Signal: {current_signal}")
     st.write(data)
    
 
