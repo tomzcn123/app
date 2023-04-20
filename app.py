@@ -769,7 +769,7 @@ elif selected_option == "WR":
     low_wr = st.sidebar.number_input("Low %R", min_value=-100, max_value=0, value=-80)
     high_wr = st.sidebar.number_input("High %R", min_value=-100, max_value=0, value=-20)
     holding_period = st.sidebar.slider("Holding period (days)", min_value=1, max_value=30, value=1, step=1, format="%d days")
-    results = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr, holding_periods= holding_period)
+    results = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr, holding_period= holding_period)
     # Plot the strategy
     #fig = plot_wr_and_strategy(data)
     #st.pyplot(fig)
