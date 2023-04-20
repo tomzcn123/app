@@ -535,9 +535,9 @@ def plot_hammer_strategy_and_patterns(data):
     buy_signals = data[data['bullish_hammer']]
     sell_signals = data[data['bearish_hammer']]
 
-    ax.plot(data.index, data['close'], label='Close Price', alpha=0.5)
-    ax.scatter(buy_signals.index, buy_signals['close'], marker='^', color='g', label='Buy Signal / Bullish Hammer', alpha=1)
-    ax.scatter(sell_signals.index, sell_signals['close'], marker='v', color='r', label='Sell Signal / Bearish Hammer', alpha=1)
+    ax.plot(data.index, data['Close'], label='Close Price', alpha=0.5)
+    ax.scatter(buy_signals.index, buy_signals['Close'], marker='^', color='g', label='Buy Signal / Bullish Hammer', alpha=1)
+    ax.scatter(sell_signals.index, sell_signals['Close'], marker='v', color='r', label='Sell Signal / Bearish Hammer', alpha=1)
 
     ax.set_xlabel('Date')
     ax.set_ylabel('Close Price')
