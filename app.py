@@ -876,7 +876,7 @@ elif selected_option == "DTW":
     # Create sliders for each element of the pattern
     pattern = np.empty(pattern_length)
     for i in range(pattern_length):
-        pattern[i] = st.sidebar.slider(f"Pattern element {i + 1}", min_value=1, max_value=10.0, value=1.0, step=1.0)
+        pattern[i] = st.sidebar.slider(f"Pattern element {i + 1}", min_value=0.0, max_value=10.0, value=1.0, step=1.0)
 
     # Set the threshold
     threshold = st.sidebar.slider("Similarity Threshold", min_value=0.0, max_value=10.0, value=1.0, step=0.01)
