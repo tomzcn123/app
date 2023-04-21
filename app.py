@@ -812,7 +812,7 @@ elif selected_option == "RSI":
     st.write(data)
 
 elif selected_option == "KDJ":
-    st.title('Relative Strength Index Strategy')
+    st.title('KDJ Strategy')
     k_period = st.sidebar.slider('K Period', min_value=1, max_value=100, value=14)
     d_period = st.sidebar.slider('D Period', min_value=1, max_value=100, value=3)
     j_period = st.sidebar.slider('J Period', min_value=1, max_value=100, value=3)
