@@ -10,7 +10,8 @@ from plotly.subplots import make_subplots
 from matplotlib.backends.backend_agg import RendererAgg
 import mplfinance as mpf
 from dtaidistance import dtw
-from dtw import dtw
+
+
 
 
 # Set up the app title and description
@@ -24,7 +25,7 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Hammer Strategy','Engulfing Strategy','Kicker Strategy','DTW','DTW2']
+options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Hammer Strategy','Engulfing Strategy','Kicker Strategy','DTW']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
@@ -630,35 +631,6 @@ def engulfing_strategy(data):
         profit_ratio = None
 
     return data,win_loss_ratio, profit_ratio, position, current_signal
-from scipy.spatial.distance import euclidean
-from fastdtw import fastdtw
-
-def find_all_similar_patterns(pattern, data, threshold, holding_period):
-    pattern_len = len(pattern)
-    data_len = len(data)
-    similar_periods = []
-    win_count = 0
-    loss_count = 0
-    total_profit = 0
-    total_loss = 0
-
-    for i in range(data_len - pattern_len - holding_period):
-        distance, _ = fastdtw(pattern, data[i:i+pattern_len], dist=euclidean)
-        if distance <= threshold:
-            similar_periods.append((i, distance))
-            profit = data[i + pattern_len + holding_period] - data[i + pattern_len]
-            if profit > 0:
-                win_count += 1
-                total_profit += (profit/data[i + pattern_len])
-            else:
-                loss_count += 1
-                total_loss -= (profit/data[i + pattern_len])
-
-    win_loss_ratio = win_count / (win_count + loss_count) if (win_count + loss_count) > 0 else np.inf
-    profit_ratio = total_profit / (total_profit + total_loss) if (total_profit + total_loss) > 0 else np.inf
-
-    return similar_periods, win_loss_ratio, profit_ratio
-
 
 def plot_engulfing_strategy_and_patterns(data):
     fig, ax = plt.subplots(figsize=(12, 6))
