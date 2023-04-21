@@ -903,7 +903,7 @@ elif selected_option == "DTW":
     
     # Plot the patterns
     if len(similar_periods) > 0:
-        plot_patterns(pattern, stock_data['Close'], similar_periods, pattern_length)
+        plot_patterns_with_buy_signals(pattern, stock_data['Close'], similar_periods, pattern_length)
         st.pyplot(plt)
     else:
         st.write("No similar patterns found.")
