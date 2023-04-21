@@ -784,6 +784,7 @@ if selected_option == 'SMA_EMA':
     st.write(data)
     
 elif selected_option == "MACD":
+    st.title('MACD Crossover Strategy')
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=12, step=1)
     long_period = st.sidebar.slider("Long Period", min_value=20, max_value=100, value=26, step=1)
     signal_period = st.sidebar.slider("Signal Period", min_value=5, max_value=50, value=9, step=1)
@@ -796,6 +797,7 @@ elif selected_option == "MACD":
     st.write(data)
     
 elif selected_option == "RSI":
+    st.title('Relative Strength Index Strategy')
     rsi_period = st.sidebar.slider("RSI Period", 1, 100, 14)
     rsi_low = st.sidebar.slider("RSI Low", 1, 100, 30)
     rsi_high = st.sidebar.slider("RSI High", 1, 100, 70)
@@ -810,6 +812,7 @@ elif selected_option == "RSI":
     st.write(data)
 
 elif selected_option == "KDJ":
+    st.title('Relative Strength Index Strategy')
     k_period = st.sidebar.slider('K Period', min_value=1, max_value=100, value=14)
     d_period = st.sidebar.slider('D Period', min_value=1, max_value=100, value=3)
     j_period = st.sidebar.slider('J Period', min_value=1, max_value=100, value=3)
@@ -863,6 +866,7 @@ elif selected_option == "BB":
     st.write(data)
     
 elif selected_option == "Hammer Strategy":
+    st.title('Hammer Strategy')
     _lock = RendererAgg.lock
     data,win_loss_ratio, profit_ratio, position, current_signal = hammer_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -876,6 +880,7 @@ elif selected_option == "Hammer Strategy":
     st.write(data)
    
 elif selected_option == "Engulfing Strategy":
+    st.title('Engulfing Strategy')
     _lock = RendererAgg.lock
     data,win_loss_ratio, profit_ratio, position, current_signal = engulfing_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -889,6 +894,7 @@ elif selected_option == "Engulfing Strategy":
     st.write(data)
     
 elif selected_option == "Kicker Strategy":
+    st.title('Kicker Strategy')
     _lock = RendererAgg.lock
     data,win_loss_ratio, profit_ratio, position, current_signal = kicker_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -903,8 +909,9 @@ elif selected_option == "Kicker Strategy":
                              
                              
 elif selected_option == "DTW":
+    st.title('Dynamic Time Warping Strategy')
     pattern_length = st.sidebar.selectbox("Select the number of elements in the pattern", range(1, 11), index=2)
-# Create sliders for each element of the pattern
+    # Create sliders for each element of the pattern
     pattern = np.empty(pattern_length)
     for i in range(pattern_length):
         pattern[i] = st.sidebar.number_input(f"Pattern element {i + 1}", min_value=0, max_value=10, value=1, step=1)
