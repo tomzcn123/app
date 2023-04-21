@@ -22,7 +22,7 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Hammer Strategy','Engulfing Strategy','Kicker Strategy','DTW']
+options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Hammer Strategy','Engulfing Strategy','Kicker Strategy','DTW','DTW2']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
@@ -628,6 +628,34 @@ def engulfing_strategy(data):
         profit_ratio = None
 
     return data,win_loss_ratio, profit_ratio, position, current_signal
+from scipy.spatial.distance import euclidean
+from fastdtw import fastdtw
+
+def find_all_similar_patterns(pattern, data, threshold, holding_period):
+    pattern_len = len(pattern)
+    data_len = len(data)
+    similar_periods = []
+    win_count = 0
+    loss_count = 0
+    total_profit = 0
+    total_loss = 0
+
+    for i in range(data_len - pattern_len - holding_period):
+        distance, _ = fastdtw(pattern, data[i:i+pattern_len], dist=euclidean)
+        if distance <= threshold:
+            similar_periods.append((i, distance))
+            profit = data[i + pattern_len + holding_period] - data[i + pattern_len]
+            if profit > 0:
+                win_count += 1
+                total_profit += (profit/data[i + pattern_len])
+            else:
+                loss_count += 1
+                total_loss -= (profit/data[i + pattern_len])
+
+    win_loss_ratio = win_count / (win_count + loss_count) if (win_count + loss_count) > 0 else np.inf
+    profit_ratio = total_profit / (total_profit + total_loss) if (total_profit + total_loss) > 0 else np.inf
+
+    return similar_periods, win_loss_ratio, profit_ratio
 
 
 def plot_engulfing_strategy_and_patterns(data):
@@ -891,6 +919,25 @@ elif selected_option == "DTW":
     st.write("Profit ratio:", profit_ratio)
     st.write(stock_data['Close'])
     
+elif selected_option == "DTW2":
+    pattern_length = st.sidebar.selectbox("Select the number of elements in the pattern", range(1, 11), index=2)
+    
+    # Create sliders for each element of the pattern
+    pattern = np.empty(pattern_length)
+    for i in range(pattern_length):
+        pattern[i] = st.sidebar.slider(f"Pattern element {i + 1}", min_value=0.0, max_value=10.0, value=1.0, step=1.0)
+
+    # Set the threshold
+    threshold = st.sidebar.slider("Similarity Threshold", min_value=0.0, max_value=10.0, value=1.0, step=1.0)
+    holding_period = st.sidebar.slider("Holding period (days)", min_value=1, max_value=30, value=1, step=1, format="%d days")
+    
+    # Call the find_all_similar_patterns function with the stock data and the pattern
+    similar_periods, win_loss_ratio, profit_ratio = find_all_similar_patterns(pattern, stock_data['Close'], threshold, holding_period)
+
+    # Display the results
+    st.write("Similar periods:", similar_periods)
+    st.write("Win/Loss ratio:", win_loss_ratio)
+    st.write("Profit ratio:", profit_ratio)
     
     
     
