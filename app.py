@@ -13,10 +13,6 @@ from dtaidistance import dtw
 
 
 
-
-# Set up the app title and description
-st.title("Stock Visualization App")
-
 # Create a sidebar title
 st.sidebar.title("Enter a stock symbol and select a date range")
 
@@ -104,7 +100,7 @@ def plot_sma_ema_strategy(data):
     sell_signals = data[data['Signal'] == -1]
     fig.add_trace(go.Scatter(x=sell_signals.index, y=sell_signals['Close'], mode='markers', name='Sell', marker=dict(color='red', size=8, symbol='circle')))
     # Customize layout
-    fig.update_layout(title='SMA-EMA Crossover Strategy', xaxis_title='Date', yaxis_title='Price')
+    fig.update_layout(xaxis_title='Date', yaxis_title='Price')
     return fig
 
 # MACD strategy
@@ -776,6 +772,7 @@ def plot_patterns_with_buy_signals(pattern, data, similar_periods, pattern_len):
 
 
 if selected_option == 'SMA_EMA':
+    st.title('SMA-EMA Crossover Strategy')
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=10, step=1)
     long_period = st.sidebar.slider("Long Period", min_value=50, max_value=200, value=50, step=1)
     data, win_loss_ratio, profit_ratio,position= sma_ema_strategy(stock_data, short_period, long_period)
