@@ -35,8 +35,8 @@ stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
 #st.plotly_chart(fig)
 
 # Display the stock data as a table
-st.write("Stock Data")
-st.write(stock_data)
+#st.write("Stock Data")
+#st.write(stock_data)
 
 
 # SMA_EMA strategy
@@ -732,8 +732,9 @@ def find_all_similar_patterns(pattern, data, threshold,holding_period):
                     loss_count += 1
                     total_loss -= (profit/data[i + pattern_len])  # Subtracting a negative value adds the absolute value
 
-    win_loss_ratio = win_count / (loss_count+win_count) if loss_count > 0 else np.inf
-    profit_ratio = total_profit / (total_loss+total_profit) if total_loss > 0 else np.inf
+    win_loss_ratio = win_count / (win_count + loss_count) if loss_count > 0 else np.inf
+    profit_ratio = total_profit / (total_profit + total_loss) if total_loss > 0 else np.inf
+
 
     return similar_periods, win_loss_ratio, profit_ratio
 
@@ -888,7 +889,7 @@ elif selected_option == "DTW":
     st.write("Similar periods:", similar_periods)
     st.write("Win/Loss ratio:", win_loss_ratio)
     st.write("Profit ratio:", profit_ratio)
-    st.write(pattern)
+    st.write(stock_data['Close'])
     
     
     
