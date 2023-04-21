@@ -9,3 +9,4 @@ mplfinance
 scipy
 dtaidistance
 fastdtw
+dtw
