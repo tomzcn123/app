@@ -911,7 +911,8 @@ elif selected_option == "DTW":
     #threshold = st.sidebar.slider("Similarity Threshold", min_value=0.0, max_value=10.0, value=1.0, step=1.0)
     #holding_period = st.sidebar.slider("Holding period (days)", min_value=1, max_value=30, value=1, step=1, format="%d days")
     # Call the find_all_similar_patterns function with the stock data and the pattern
-    pattern = np.array([1, 2])
+    pattern = np.array([1, 2, 3])
+    
     holding_period = 2
     threshold = 2
     similar_periods, win_loss_ratio, profit_ratio = find_all_similar_patterns(pattern, stock_data['Close'], threshold, holding_period)
