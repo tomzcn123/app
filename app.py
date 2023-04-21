@@ -888,6 +888,7 @@ elif selected_option == "DTW":
     st.write("Similar periods:", similar_periods)
     st.write("Win/Loss ratio:", win_loss_ratio)
     st.write("Profit ratio:", profit_ratio)
+    st.write(pattern)
     
     
     
