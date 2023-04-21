@@ -902,10 +902,11 @@ elif selected_option == "Kicker Strategy":
                              
 elif selected_option == "DTW":
     pattern_length = st.sidebar.selectbox("Select the number of elements in the pattern", range(1, 11), index=2)
-    # Create sliders for each element of the pattern
+# Create sliders for each element of the pattern
     pattern = np.empty(pattern_length)
     for i in range(pattern_length):
-        pattern[i] = st.sidebar.number_input(f"Pattern element {i + 1}", min_value=0, max_value=10, value=1.0,step =1)
+        pattern[i] = st.sidebar.number_input(f"Pattern element {i + 1}", min_value=0, max_value=10, value=1, step=1)
+
 
     # Set the threshold
     threshold = st.sidebar.number_input("Similarity Threshold", min_value=0, max_value=10, value=1,step=1)
