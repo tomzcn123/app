@@ -920,12 +920,10 @@ elif selected_option == "DTW":
     st.write(stock_data['Close'])
     
 elif selected_option == "DTW2":
-    pattern_length = st.sidebar.selectbox("Select the number of elements in the pattern", range(1, 11), index=2)
-    
+
     # Create sliders for each element of the pattern
-    pattern = np.empty(pattern_length)
-    for i in range(pattern_length):
-        pattern[i] = st.sidebar.slider(f"Pattern element {i + 1}", min_value=0.0, max_value=10.0, value=1.0, step=1.0)
+    pattern_text = st.sidebar.text_input("Enter the pattern (comma-separated values)", "1, 2, 3")
+    pattern = np.array([float(x.strip()) for x in pattern_text.split(",")])
 
     # Set the threshold
     threshold = st.sidebar.slider("Similarity Threshold", min_value=0.0, max_value=10.0, value=1.0, step=1.0)
