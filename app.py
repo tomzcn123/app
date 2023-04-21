@@ -905,10 +905,10 @@ elif selected_option == "DTW":
     # Create sliders for each element of the pattern
     pattern = np.empty(pattern_length)
     for i in range(pattern_length):
-        pattern[i] = st.number_input(f"Pattern element {i + 1}", min_value=0.0, max_value=10.0, value=1.0)
+        pattern[i] = st.sidebar.number_input(f"Pattern element {i + 1}", min_value=0.0, max_value=10.0, value=1.0,step=1)
 
     # Set the threshold
-    threshold = st.sidebar.number_input("Similarity Threshold", min_value=0.0, max_value=10.0, value=1.0)
+    threshold = st.sidebar.number_input("Similarity Threshold", min_value=0.0, max_value=10.0, value=1.0,step=1)
     holding_period = st.sidebar.slider("Holding period (days)", min_value=1, max_value=30, value=1, step=1, format="%d days")
     # Call the find_all_similar_patterns function with the stock data and the pattern
     #pattern = np.array([1, 2, 3])
@@ -921,24 +921,6 @@ elif selected_option == "DTW":
     st.write("Win/Loss ratio:", win_loss_ratio)
     st.write("Profit ratio:", profit_ratio)
     st.write(stock_data['Close'])
-    
-elif selected_option == "DTW2":
-
-    # Create sliders for each element of the pattern
-    pattern_text = st.sidebar.text_input("Enter the pattern (comma-separated values)", "1, 2, 3")
-    pattern = np.array([float(x.strip()) for x in pattern_text.split(",")])
-
-    # Set the threshold
-    threshold = st.sidebar.slider("Similarity Threshold", min_value=0.0, max_value=10.0, value=1.0, step=1.0)
-    holding_period = st.sidebar.slider("Holding period (days)", min_value=1, max_value=30, value=1, step=1, format="%d days")
-    
-    # Call the find_all_similar_patterns function with the stock data and the pattern
-    similar_periods, win_loss_ratio, profit_ratio = find_all_similar_patterns(pattern, stock_data['Close'], threshold, holding_period)
-
-    # Display the results
-    st.write("Similar periods:", similar_periods)
-    st.write("Win/Loss ratio:", win_loss_ratio)
-    st.write("Profit ratio:", profit_ratio)
     
     
     
