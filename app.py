@@ -709,7 +709,7 @@ def plot_kicker_strategy_and_patterns(data):
     plt.show()
 
 #DTW
-def find_all_similar_patterns(pattern, data, threshold,holding_period:
+def find_all_similar_patterns(pattern, data, threshold,holding_period):
     pattern_len = len(pattern)
     data_len = len(data)
     similar_periods = []
