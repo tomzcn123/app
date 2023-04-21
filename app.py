@@ -10,6 +10,8 @@ from plotly.subplots import make_subplots
 from matplotlib.backends.backend_agg import RendererAgg
 import mplfinance as mpf
 from dtaidistance import dtw
+from dtw import dtw
+
 
 # Set up the app title and description
 st.title("Stock Visualization App")
@@ -766,7 +768,17 @@ def find_all_similar_patterns(pattern, data, threshold,holding_period):
 
     return similar_periods, win_loss_ratio, profit_ratio
 
-
+def plot_patterns(pattern, data, similar_periods, pattern_len):
+    plt.figure(figsize=(12, 6))
+    for i, _ in similar_periods:
+        plt.plot(range(i, i+pattern_len), data[i:i+pattern_len], linewidth=1, alpha=0.7)
+    plt.plot(range(pattern_len), pattern, 'k--', linewidth=2, label="Input Pattern")
+    plt.xlabel("Time")
+    plt.ylabel("Price")
+    plt.legend()
+    plt.title("Identified Similar Patterns")
+    plt.grid()
+    return plt
 
 
 
@@ -906,8 +918,6 @@ elif selected_option == "DTW":
     pattern = np.empty(pattern_length)
     for i in range(pattern_length):
         pattern[i] = st.sidebar.number_input(f"Pattern element {i + 1}", min_value=0, max_value=10, value=1, step=1)
-
-
     # Set the threshold
     threshold = st.sidebar.number_input("Similarity Threshold", min_value=0, max_value=10, value=1,step=1)
     holding_period = st.sidebar.slider("Holding period (days)", min_value=1, max_value=30, value=1, step=1, format="%d days")
@@ -916,14 +926,19 @@ elif selected_option == "DTW":
     #holding_period = 2
     #threshold = 2
     similar_periods, win_loss_ratio, profit_ratio = find_all_similar_patterns(pattern, stock_data['Close'], threshold, holding_period)
-
+    
+    if len(similar_periods) > 0:
+        plot_patterns(pattern, stock_data['Close'], similar_periods, pattern_length)
+        st.pyplot(plt)
+    else:
+        st.write("No similar patterns found.")
+        
     # Display the results
     st.write("Similar periods:", similar_periods)
     st.write("Win/Loss ratio:", win_loss_ratio)
     st.write("Profit ratio:", profit_ratio)
-    st.write(stock_data['Close'])
     
-    
+
     
    
 
