@@ -738,18 +738,18 @@ def find_all_similar_patterns(pattern, data, threshold,holding_period):
     profit_ratio = total_profit / (total_profit + total_loss) if total_loss > 0 else np.inf
     return similar_periods, win_loss_ratio, profit_ratio
 
-    def find_latest_similar_pattern(pattern, data, threshold):
-        pattern_len = len(pattern)
-        data_len = len(data)
-    
-        # Check the last pattern_len elements of the data
-        i = data_len - pattern_len
-        distance = dtw.distance(pattern, data[i:i+pattern_len])
+def find_latest_similar_pattern(pattern, data, threshold):
+    pattern_len = len(pattern)
+    data_len = len(data)
 
-        if distance <= threshold:
-            return (i, distance)
-        else:
-            return None
+    # Check the last pattern_len elements of the data
+    i = data_len - pattern_len
+    distance = dtw.distance(pattern, data[i:i+pattern_len])
+
+    if distance <= threshold:
+        return (i, distance)
+    else:
+        return None
 
 def plot_patterns_with_buy_signals(pattern, data, similar_periods, pattern_len):
     plt.figure(figsize=(12, 6))
