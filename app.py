@@ -751,18 +751,26 @@ def find_latest_similar_pattern(pattern, data, threshold):
     else:
         return None
 
+
 def plot_patterns_with_buy_signals(pattern, data, similar_periods, pattern_len):
     plt.figure(figsize=(12, 6))
+
     for i, _ in similar_periods:
-        plt.plot(range(i, i+pattern_len), data[i:i+pattern_len], linewidth=1, alpha=0.7)
-        plt.axvline(i, color='red', linestyle='--', alpha=0.7, label="Buy signal" if i == similar_periods[0][0] else None) # Label only the first buy signal
-    plt.plot(range(pattern_len), pattern, 'k--', linewidth=2, label="Input Pattern")
-    plt.xlabel("Time")
+        plt.plot(data.index[i:i+pattern_len], data[i:i+pattern_len], linewidth=1, alpha=0.7)
+        plt.axvline(data.index[i], color='red', linestyle='--', alpha=0.7, label="Buy signal" if i == similar_periods[0][0] else None) # Label only the first buy signal
+
+    plt.plot(data.index[:pattern_len], pattern, 'k--', linewidth=2, label="Input Pattern")
+    plt.xlabel("Date")
     plt.ylabel("Price")
     plt.legend()
     plt.title("Identified Similar Patterns and Buy Signals")
     plt.grid()
-    return plt
+    plt.show()
+
+
+
+
+
 
 
 
