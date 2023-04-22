@@ -828,6 +828,7 @@ elif selected_option == 'SMA_EMA':
     st.plotly_chart(fig)
     fig2 = distribution(pl)
     st.plotly_chart(fig2)
+    st.write(pl)
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Current Recommended Position: ", position)
