@@ -703,12 +703,16 @@ def plot_kicker_strategy_and_patterns(data):
    
 #Graph the distribution 
 def distribution(data):
-    plt.hist(data, bins=20, alpha=0.75)
-    plt.xlabel('Profit Ratio')
-    plt.ylabel('Frequency')
-    plt.title('Histogram of Profit Ratios')
-    plt.grid(True)
-    plt.show()
+    fig = go.Figure()
+    fig.add_trace(go.Histogram(x=data, nbinsx=20, marker=dict(color='rgba(0, 0, 150, 0.75)')))
+    fig.update_layout(
+        title='Histogram of Profit Ratios',
+        xaxis_title='Profit Ratio',
+        yaxis_title='Frequency',
+        bargap=0.1,
+        bargroupgap=0.1
+    )
+    return fig
     
 #DTW
 def find_all_similar_patterns(pattern, data, threshold,holding_period):
