@@ -21,17 +21,12 @@ stock_symbol = st.sidebar.text_input("Enter Stock Symbol", "AAPL")
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("today"))
 
-options= ['MACD','SMA_EMA','RSI','KDJ','WR','BB','Hammer Strategy','Engulfing Strategy','Kicker Strategy','DTW']
+options= ['Overview','MACD','SMA_EMA','RSI','KDJ','WR','BB','Hammer Strategy','Engulfing Strategy','Kicker Strategy','DTW']
 selected_option = st.sidebar.selectbox("Choose an potential opportunity", options)
 
 
 # Download stock data using yfinance
 stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
-
-# Plot the stock data with Plotly
-#fig = px.line(stock_data, x=stock_data.index, y='Close', title=f'{stock_symbol} Closing Price')
-#st.write("Stock Price Chart")
-#st.plotly_chart(fig)
 
 # Display the stock data as a table
 #st.write("Stock Data")
@@ -764,14 +759,54 @@ def plot_patterns_with_buy_signals(pattern, data, similar_periods, pattern_len):
     plt.show()
 
 
+if selected_option == 'Overview':
+    st.title('Stock Summuary')
+    # Plot the stock data with Plotly
+    fig = px.line(stock_data, x=stock_data.index, y='Close', title=f'{stock_symbol} Closing Price')
+    st.write("Stock Price Chart")
+    st.plotly_chart(fig)
+    #SMA-EMA
+    data_SMA, win_loss_ratio_SMA, profit_ratio_SMA,position_SMA= sma_ema_strategy(stock_data, short_period=5, long_period=9)
+    #MACD
+    data_MACD, win_loss_ratio_MACD, profit_ratio_MACD,latest_position_MACD = macd_strategy(stock_data, short_period=12, long_period=26, signal_period=9)
+    #RSI
+    data_RSI, win_loss_ratio_RSI, profit_ratio_RSI, latest_position_RSI = rsi_strategy_single(stock_data, rsi_period=14, rsi_low=30, rsi_high=70)
+    #KDJ
+    data_KDJ, win_loss_ratio_KDJ, profit_ratio_KDJ, latest_position_KDJ = kdj_strategy(stock_data, k_period=14, d_period=3, j_period, buy_level=20, sell_level=80)
+    #Bollinger Bands Strategy
+    data_BB, win_loss_ratio_BB, profit_ratio_BB, latest_position_BB = bollinger_bands_strategy_and_bands(stock_data, period=20)
+    #Hammer Strategy
+    data_HS,win_loss_ratio_HS, profit_ratio_HS, position_HS, current_signal_HS = hammer_strategy(stock_data)
+    #Engulfing Strategy
+    data_ES,win_loss_ratio_ES, profit_ratio_ES, position_ES, current_signal_ES = engulfing_strategy(stock_data)
+    #Kicker Strategy
+    data_KS,win_loss_ratio_KS, profit_ratio_KS, position_KS, current_signal_KS = kicker_strategy(stock_data)
+
+    #Dynamic Time Warping Strategy
+    similar_periods_DTW, win_loss_ratio_DTW, profit_ratio_DTW = find_all_similar_patterns(pattern=np.array([1,2,3]), stock_data['Close'], threshold=2, holding_period=1)
+    latest_pattern_DTW = find_latest_similar_pattern(pattern=np.array([1,2,3]), stock_data['Close'], threshold=2)
+
+    data = {
+        "SMA-EMA": [win_loss_ratio_SMA,profit_ratio_SMA, position_SMA, "-"],
+        "MACD": [win_loss_ratio_MACD, profit_ratio_MACD, latest_position_MACD,"-"],
+        "RSI": [win_loss_ratio_RSI, profit_ratio_RSI,latest_position_RSI,"-"],
+        "KDJ": [win_loss_ratio_KDJ, profit_ratio_KDJ,latest_position_KDJ,"-"],
+        "BB": [win_loss_ratio_BB, profit_ratio_BB,latest_position_BB,"-"],
+        "Hammer": [win_loss_ratio_HS, profit_ratio_HS, position_HS,current_signal_HS],
+        "Engulfing": [win_loss_ratio_ES, profit_ratio_ES, position_ES, current_signal_ES],
+        "Kicker": [win_loss_ratio_KS, profit_ratio_KS, position_KS, current_signal_KS],
+        "DTW": [win_loss_ratio_DTW, profit_ratio_DTW ,latest_pattern_DTW,"-"],
+    }
+    row_names = ["Win Loss Ratio", "Profit Ratio", "Current Position", "Current Signal"]
+    df = pd.DataFrame(data, index=row_names)
+    st.table(df)
+    
 
 
 
 
 
-
-
-if selected_option == 'SMA_EMA':
+elif selected_option == 'SMA_EMA':
     st.title('SMA-EMA Crossover Strategy')
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=10, step=1)
     long_period = st.sidebar.slider("Long Period", min_value=50, max_value=200, value=50, step=1)
