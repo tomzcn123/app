@@ -148,7 +148,7 @@ def macd_strategy(data, short_period, long_period, signal_period):
     latest_position = position
     win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
     profit_ratio = round(sum(profit) / len(profit), 3)
-    return data, win_loss_ratio, profit_ratio, latest_position
+    return data, win_loss_ratio, profit_ratio, latest_position,profit
 
 def plot_macd_strategy(data):
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(14, 10), gridspec_kw={'height_ratios': [3, 1, 1]}, sharex=True)
@@ -245,7 +245,7 @@ def rsi_strategy_single(data, rsi_period, rsi_low, rsi_high):
         win_loss_ratio = None
         profit_ratio = None
         
-    return data, win_loss_ratio, profit_ratio,latest_position
+    return data, win_loss_ratio, profit_ratio,latest_position,profit
 
 def plot_rsi_strategy(data):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), gridspec_kw={'height_ratios': [3, 1]}, sharex=True)
@@ -331,7 +331,7 @@ def kdj_strategy(data, k_period=14, d_period=3, j_period=3, buy_level=20, sell_l
         win_loss_ratio = None
         profit_ratio = None
 
-    return data,win_loss_ratio,profit_ratio, latest_position
+    return data,win_loss_ratio,profit_ratio, latest_position,profit
 
 def plot_kdj_signals(data):
     # Create subplots
