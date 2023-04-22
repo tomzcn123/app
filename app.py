@@ -772,7 +772,7 @@ if selected_option == 'Overview':
     #RSI
     data_RSI, win_loss_ratio_RSI, profit_ratio_RSI, latest_position_RSI = rsi_strategy_single(stock_data, rsi_period=14, rsi_low=30, rsi_high=70)
     #KDJ
-    data_KDJ, win_loss_ratio_KDJ, profit_ratio_KDJ, latest_position_KDJ = kdj_strategy(stock_data, k_period, d_period, j_period, buy_level, sell_level)
+    data_KDJ, win_loss_ratio_KDJ, profit_ratio_KDJ, latest_position_KDJ = kdj_strategy(stock_data)
     #Bollinger Bands Strategy
     data_BB, win_loss_ratio_BB, profit_ratio_BB, latest_position_BB = bollinger_bands_strategy_and_bands(stock_data, period=20)
     #Hammer Strategy
