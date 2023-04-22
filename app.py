@@ -783,8 +783,8 @@ if selected_option == 'Overview':
     data_KS,win_loss_ratio_KS, profit_ratio_KS, position_KS, current_signal_KS = kicker_strategy(stock_data)
 
     #Dynamic Time Warping Strategy
-    similar_periods_DTW, win_loss_ratio_DTW, profit_ratio_DTW = find_all_similar_patterns(pattern=np.array([1,2,3]), stock_data['Close'], threshold=2, holding_period=1)
-    latest_pattern_DTW = find_latest_similar_pattern(pattern=np.array([1,2,3]), stock_data['Close'], threshold=2)
+    similar_periods_DTW, win_loss_ratio_DTW, profit_ratio_DTW = find_all_similar_patterns(pattern=np.array([1,2,3]), data=stock_data['Close'], threshold=2, holding_period=1)
+    latest_pattern_DTW = find_latest_similar_pattern(pattern=np.array([1,2,3]), data=stock_data['Close'], threshold=2)
 
     data = {
         "SMA-EMA": [win_loss_ratio_SMA,profit_ratio_SMA, position_SMA, "-"],
