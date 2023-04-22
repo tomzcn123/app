@@ -80,7 +80,7 @@ def sma_ema_strategy(data, short_period, long_period):
     latest_position = position
     win_loss_ratio = round(sum(win_loss) / len(win_loss), 3)
     profit_ratio = round(sum(profit) / len(profit), 3)
-    return data, win_loss_ratio, profit_ratio,latest_position
+    return data, win_loss_ratio, profit_ratio,latest_position,profit
 
 def plot_sma_ema_strategy(data):
     fig = go.Figure()
@@ -698,9 +698,18 @@ def plot_kicker_strategy_and_patterns(data):
     ax.set_ylabel('Close Price')
     ax.set_title('Kicker Strategy and Kicker Patterns')
     ax.legend(loc='best')
-
     plt.show()
 
+   
+#Graph the distribution 
+def distribution(data):
+    plt.hist(data, bins=20, alpha=0.75)
+    plt.xlabel('Profit Ratio')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of Profit Ratios')
+    plt.grid(True)
+    plt.show()
+    
 #DTW
 def find_all_similar_patterns(pattern, data, threshold,holding_period):
     pattern_len = len(pattern)
@@ -760,13 +769,13 @@ def plot_patterns_with_buy_signals(pattern, data, similar_periods, pattern_len):
 
 
 if selected_option == 'Overview':
-    st.title('Stock Summuary')
+    st.title('Stock Summary')
     # Plot the stock data with Plotly
     fig = px.line(stock_data, x=stock_data.index, y='Close', title=f'{stock_symbol} Closing Price')
     st.write("Stock Price Chart")
     st.plotly_chart(fig)
     #SMA-EMA
-    data_SMA, win_loss_ratio_SMA, profit_ratio_SMA,position_SMA= sma_ema_strategy(stock_data, short_period=5, long_period=9)
+    data_SMA, win_loss_ratio_SMA, profit_ratio_SMA,position_SMA,PL= sma_ema_strategy(stock_data, short_period=5, long_period=9)
     #MACD
     data_MACD, win_loss_ratio_MACD, profit_ratio_MACD,latest_position_MACD = macd_strategy(stock_data, short_period=12, long_period=26, signal_period=9)
     #RSI
@@ -810,9 +819,11 @@ elif selected_option == 'SMA_EMA':
     st.title('SMA-EMA Crossover Strategy')
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=10, step=1)
     long_period = st.sidebar.slider("Long Period", min_value=50, max_value=200, value=50, step=1)
-    data, win_loss_ratio, profit_ratio,position= sma_ema_strategy(stock_data, short_period, long_period)
+    data, win_loss_ratio, profit_ratio,position,pl= sma_ema_strategy(stock_data, short_period, long_period)
     fig = plot_sma_ema_strategy(data)
     st.plotly_chart(fig)
+    fig2 = distribution(pl)
+    st.plotly_chart(fig2)
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Current Recommended Position: ", position)
