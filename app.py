@@ -740,7 +740,7 @@ def find_all_similar_patterns(pattern, data, threshold,holding_period):
                     total_profit.append(profit/data[i + pattern_len])
 
     win_loss_ratio = round(win_count / (win_count + loss_count),3)if loss_count > 0 else np.inf
-    profit_ratio = round(sum(total_profit) / len(total_profit),3)
+    profit_ratio = round(sum(total_profit) / len(total_profit), 3) if total_profit else 0
     return similar_periods, win_loss_ratio, profit_ratio,total_profit
 
 def find_latest_similar_pattern(pattern, data, threshold):
