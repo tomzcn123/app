@@ -381,6 +381,7 @@ def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20, holding_per
 
     long_win_loss_ratio = long_results['winning_trades'] / (long_results['winning_trades'] + long_results['losing_trades'])
     long_profit_ratio = sum(long_results['total_profit']) / len(long_results['total_profit'])
+    
 
     short_win_loss_ratio = short_results['winning_trades'] / (short_results['winning_trades'] + short_results['losing_trades'])
     short_profit_ratio = sum(short_results['total_profit']) / len(short_results['total_profit'])
@@ -391,7 +392,7 @@ def wr_strategy_and_ratios(data, period=14, low_wr=-80, high_wr=-20, holding_per
     results[f'short_{holding_period}_days'] = {'win_loss_ratio': short_win_loss_ratio,'profit_ratio': short_profit_ratio,
         }
 
-    return data,results
+    return data,results,long_results['total_profit'],short_results['total_profit']
 
 def calculate_trade_results(data, holding_period):
     long_results = {
@@ -496,7 +497,7 @@ def bollinger_bands_strategy_and_bands(data, period=20):
         profit_ratio = None
     latest_position = position
     
-    return data, win_loss_ratio, profit_ratio, latest_position
+    return data, win_loss_ratio, profit_ratio, latest_position,profit
 
 def plot_bollinger_bands_strategy_and_bands(data):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12), sharex=True)
@@ -562,7 +563,7 @@ def hammer_strategy(data):
         win_loss_ratio = None
         profit_ratio = None
 
-    return data,win_loss_ratio, profit_ratio, position, current_signal
+    return data,win_loss_ratio, profit_ratio, position, current_signal,profit
 
 
 def plot_hammer_strategy_and_patterns(data):
@@ -621,7 +622,7 @@ def engulfing_strategy(data):
         win_loss_ratio = None
         profit_ratio = None
 
-    return data,win_loss_ratio, profit_ratio, position, current_signal
+    return data,win_loss_ratio, profit_ratio, position, current_signal,profit
 
 def plot_engulfing_strategy_and_patterns(data):
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -681,7 +682,7 @@ def kicker_strategy(data):
         win_loss_ratio = None
         profit_ratio = None
 
-    return data,win_loss_ratio, profit_ratio, position, current_signal
+    return data,win_loss_ratio, profit_ratio, position, current_signal,profit
 
 
 def plot_kicker_strategy_and_patterns(data):
@@ -721,8 +722,8 @@ def find_all_similar_patterns(pattern, data, threshold,holding_period):
     similar_periods = []
     win_count = 0
     loss_count = 0
-    total_profit = 0
-    total_loss = 0
+    total_profit = []
+    
 
     for i in range(data_len - pattern_len):
         distance = dtw.distance(pattern, data[i:i+pattern_len])
@@ -733,14 +734,14 @@ def find_all_similar_patterns(pattern, data, threshold,holding_period):
                 profit = data[i + pattern_len + holding_period] - data[i + pattern_len]
                 if profit > 0:
                     win_count += 1
-                    total_profit += (profit/data[i + pattern_len])
+                    total_profit.append(profit/data[i + pattern_len])
                 else:
                     loss_count += 1
-                    total_loss -= (profit/data[i + pattern_len])  # Subtracting a negative value adds the absolute value
+                    total_profit.append(profit/data[i + pattern_len])  # Subtracting a negative value adds the absolute value
 
     win_loss_ratio = round(win_count / (win_count + loss_count),3)if loss_count > 0 else np.inf
-    profit_ratio = round(total_profit / (total_profit + total_loss),3) if total_loss > 0 else np.inf
-    return similar_periods, win_loss_ratio, profit_ratio
+    profit_ratio = round(sum(total_profit) / len(total_profit),3) if total_profit > 0 else np.inf
+    return similar_periods, win_loss_ratio, profit_ratio,total_profit
 
 def find_latest_similar_pattern(pattern, data, threshold):
     pattern_len = len(pattern)
@@ -779,21 +780,21 @@ if selected_option == 'Overview':
     st.write("Stock Price Chart")
     st.plotly_chart(fig)
     #SMA-EMA
-    data_SMA, win_loss_ratio_SMA, profit_ratio_SMA,position_SMA,PL= sma_ema_strategy(stock_data, short_period=5, long_period=9)
+    data_SMA, win_loss_ratio_SMA, profit_ratio_SMA,position_SMA,PL_SMA= sma_ema_strategy(stock_data, short_period=5, long_period=9)
     #MACD
-    data_MACD, win_loss_ratio_MACD, profit_ratio_MACD,latest_position_MACD = macd_strategy(stock_data, short_period=12, long_period=26, signal_period=9)
+    data_MACD, win_loss_ratio_MACD, profit_ratio_MACD,latest_position_MACD,PL_MACD = macd_strategy(stock_data, short_period=12, long_period=26, signal_period=9)
     #RSI
-    data_RSI, win_loss_ratio_RSI, profit_ratio_RSI, latest_position_RSI = rsi_strategy_single(stock_data, rsi_period=14, rsi_low=30, rsi_high=70)
+    data_RSI, win_loss_ratio_RSI, profit_ratio_RSI, latest_position_RSI,PL_RSI = rsi_strategy_single(stock_data, rsi_period=14, rsi_low=30, rsi_high=70)
     #KDJ
-    data_KDJ, win_loss_ratio_KDJ, profit_ratio_KDJ, latest_position_KDJ = kdj_strategy(stock_data)
+    data_KDJ, win_loss_ratio_KDJ, profit_ratio_KDJ, latest_position_KDJ,PL_KDJ = kdj_strategy(stock_data)
     #Bollinger Bands Strategy
-    data_BB, win_loss_ratio_BB, profit_ratio_BB, latest_position_BB = bollinger_bands_strategy_and_bands(stock_data, period=20)
+    data_BB, win_loss_ratio_BB, profit_ratio_BB, latest_position_BB,PL_BB = bollinger_bands_strategy_and_bands(stock_data, period=20)
     #Hammer Strategy
-    data_HS,win_loss_ratio_HS, profit_ratio_HS, position_HS, current_signal_HS = hammer_strategy(stock_data)
+    data_HS,win_loss_ratio_HS, profit_ratio_HS, position_HS, current_signal_HS,PL_HS = hammer_strategy(stock_data)
     #Engulfing Strategy
-    data_ES,win_loss_ratio_ES, profit_ratio_ES, position_ES, current_signal_ES = engulfing_strategy(stock_data)
+    data_ES,win_loss_ratio_ES, profit_ratio_ES, position_ES, current_signal_ES,PL_ES = engulfing_strategy(stock_data)
     #Kicker Strategy
-    data_KS,win_loss_ratio_KS, profit_ratio_KS, position_KS, current_signal_KS = kicker_strategy(stock_data)
+    data_KS,win_loss_ratio_KS, profit_ratio_KS, position_KS, current_signal_KS,PL_KS = kicker_strategy(stock_data)
 
     #Dynamic Time Warping Strategy
     similar_periods_DTW, win_loss_ratio_DTW, profit_ratio_DTW = find_all_similar_patterns(pattern=np.array([1,2,3]), data=stock_data['Close'], threshold=2, holding_period=1)
@@ -828,7 +829,6 @@ elif selected_option == 'SMA_EMA':
     st.plotly_chart(fig)
     fig2 = distribution(pl)
     st.plotly_chart(fig2)
-    st.write(pl)
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Current Recommended Position: ", position)
@@ -839,9 +839,11 @@ elif selected_option == "MACD":
     short_period = st.sidebar.slider("Short Period", min_value=5, max_value=50, value=12, step=1)
     long_period = st.sidebar.slider("Long Period", min_value=20, max_value=100, value=26, step=1)
     signal_period = st.sidebar.slider("Signal Period", min_value=5, max_value=50, value=9, step=1)
-    data, win_loss_ratio, profit_ratio, latest_position = macd_strategy(stock_data, short_period, long_period, signal_period)
+    data, win_loss_ratio, profit_ratio, latest_position,pl = macd_strategy(stock_data, short_period, long_period, signal_period)
     fig = plot_macd_strategy(data)
     st.pyplot(fig)
+    fig2 = distribution(pl)
+    st.plotly_chart(fig2)
     st.write("Win Loss Ratio: ", win_loss_ratio)
     st.write("Profit Ratio: ", profit_ratio)
     st.write("Latest Position: ", latest_position)
@@ -852,11 +854,13 @@ elif selected_option == "RSI":
     rsi_period = st.sidebar.slider("RSI Period", 1, 100, 14)
     rsi_low = st.sidebar.slider("RSI Low", 1, 100, 30)
     rsi_high = st.sidebar.slider("RSI High", 1, 100, 70)
-    data, win_loss_ratio, profit_ratio, latest_position = rsi_strategy_single(stock_data, rsi_period, rsi_low, rsi_high)
+    data, win_loss_ratio, profit_ratio, latest_position,pl = rsi_strategy_single(stock_data, rsi_period, rsi_low, rsi_high)
     st.write("RSI Strategy")
     st.set_option('deprecation.showPyplotGlobalUse', False)
     fig = plot_rsi_strategy(data)
     st.pyplot(fig)
+    fig2 = distribution(pl)
+    st.plotly_chart(fig2)
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
@@ -869,9 +873,11 @@ elif selected_option == "KDJ":
     j_period = st.sidebar.slider('J Period', min_value=1, max_value=100, value=3)
     buy_level = st.sidebar.slider('Buy Level', min_value=0, max_value=100, value=20)
     sell_level = st.sidebar.slider('Sell Level', min_value=0, max_value=100, value=80)
-    data, win_loss_ratio, profit_ratio, latest_position = kdj_strategy(stock_data, k_period, d_period, j_period, buy_level, sell_level)
+    data, win_loss_ratio, profit_ratio, latest_position,pl = kdj_strategy(stock_data, k_period, d_period, j_period, buy_level, sell_level)
     fig = plot_kdj_signals(data)
     st.plotly_chart(fig)
+    fig2 = distribution(pl)
+    st.plotly_chart(fig2)
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
     st.write(f"Latest Position: {latest_position}")
@@ -883,7 +889,7 @@ elif selected_option == "WR":
     low_wr = st.sidebar.number_input("Low %R", min_value=-100, max_value=0, value=-80)
     high_wr = st.sidebar.number_input("High %R", min_value=-100, max_value=0, value=-20)
     holding_period = st.sidebar.slider("Holding period (days)", min_value=1, max_value=30, value=1, step=1, format="%d days")
-    data, results = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr, holding_period=holding_period)
+    data, results,pl1,pl2 = wr_strategy_and_ratios(stock_data, period, low_wr, high_wr, holding_period=holding_period)
     # Plot buy and sell signals graph
     st.write("Buy and Sell signals:")
     plot_buy_sell_signals(data, streamlit=True)
@@ -891,6 +897,11 @@ elif selected_option == "WR":
     # Plot Williams %R graph
     st.write("Williams %R:")
     plot_wr(data, streamlit=True)
+    fig2 = distribution(pl1)
+    st.plotly_chart(fig2)
+    fig3 = distribution(pl2)
+    st.plotly_chart(fig3)
+    
     # Display results
     st.write("Results:")
     for key, value in results.items():
@@ -904,11 +915,13 @@ elif selected_option == "BB":
     period = st.sidebar.slider('Period', min_value=1, max_value=50, value=20, step=1)
 
     # Calculate the strategy and bands with the selected period
-    data, win_loss_ratio, profit_ratio, latest_position = bollinger_bands_strategy_and_bands(stock_data, period)
+    data, win_loss_ratio, profit_ratio, latest_position,pl = bollinger_bands_strategy_and_bands(stock_data, period)
     
     # Plot the strategy and Bollinger Bands
     fig = plot_bollinger_bands_strategy_and_bands(data)
     st.pyplot(fig)
+    fig2 = distribution(pl)
+    st.plotly_chart(fig2)
     
     # Display the results
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
@@ -919,10 +932,12 @@ elif selected_option == "BB":
 elif selected_option == "Hammer Strategy":
     st.title('Hammer Strategy')
     _lock = RendererAgg.lock
-    data,win_loss_ratio, profit_ratio, position, current_signal = hammer_strategy(stock_data)
+    data,win_loss_ratio, profit_ratio, position, current_signal,pl = hammer_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
     with _lock:
         st.pyplot(plot_hammer_strategy_and_patterns(data))
+    fig2 = distribution(pl)
+    st.plotly_chart(fig2)
     # Display strategy results
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
@@ -933,10 +948,12 @@ elif selected_option == "Hammer Strategy":
 elif selected_option == "Engulfing Strategy":
     st.title('Engulfing Strategy')
     _lock = RendererAgg.lock
-    data,win_loss_ratio, profit_ratio, position, current_signal = engulfing_strategy(stock_data)
+    data,win_loss_ratio, profit_ratio, position, current_signal,pl = engulfing_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
     with _lock:
         st.pyplot(plot_engulfing_strategy_and_patterns(data))
+    fig2 = distribution(pl)
+    st.plotly_chart(fig2)
     # Display strategy results
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
@@ -947,10 +964,12 @@ elif selected_option == "Engulfing Strategy":
 elif selected_option == "Kicker Strategy":
     st.title('Kicker Strategy')
     _lock = RendererAgg.lock
-    data,win_loss_ratio, profit_ratio, position, current_signal = kicker_strategy(stock_data)
+    data,win_loss_ratio, profit_ratio, position, current_signal,pl = kicker_strategy(stock_data)
     st.set_option('deprecation.showPyplotGlobalUse', False)
     with _lock:
         st.pyplot(plot_kicker_strategy_and_patterns(data))
+    fig2 = distribution(pl)
+    st.plotly_chart(fig2)
     # Display strategy results
     st.write(f"Win Loss Ratio: {win_loss_ratio}")
     st.write(f"Profit Ratio: {profit_ratio}")
@@ -973,15 +992,16 @@ elif selected_option == "DTW":
     #pattern = np.array([1, 2, 3])
     #holding_period = 2
     #threshold = 2
-    similar_periods, win_loss_ratio, profit_ratio = find_all_similar_patterns(pattern, stock_data['Close'], threshold, holding_period)
+    similar_periods, win_loss_ratio, profit_ratio,pl = find_all_similar_patterns(pattern, stock_data['Close'], threshold, holding_period)
     
     # Plot the patterns
     if len(similar_periods) > 0:
         plot_patterns_with_buy_signals(pattern, stock_data['Close'], similar_periods, pattern_length)
         st.pyplot(plt)
+        fig2 = distribution(pl)
+        st.plotly_chart(fig2) 
     else:
         st.write("No similar patterns found.")
-        
     # Display the results
     st.write("Similar periods:", similar_periods)
     st.write("Win/Loss ratio:", win_loss_ratio)
